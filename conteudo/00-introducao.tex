@@ -33,49 +33,72 @@ como um recurso estratégico pelas potências globais como EUA, China, Japão e 
 os EUA inauguraram o primeiro centro de HPC público exascale, o Frontier, que possui a capacidade de efetuar mais de um quintilhão de operações
 de ponto-flutuante por segundo. 
 
-Entretanto, toda essa potência tem um preço: estima-se q
+Entretanto, toda essa potência tem um preço: estima-se que o Frontier consuma cerca de 21 MW em operação contínua, 
+energia que seria suficiente para abastecer cerca de 15.000 casas. Essa altíssima demanda energética é um
+dos pontos chave quando se fala de HPC. Dados estimam que centros de HPC em específico consumam entre 3.2 a 5.9 bilhões 
+de kWh anualmente, enquanto que datacenters de modo geral consumam cerca de 200 a 460 TWh anualmente, o que 
+representa cerca de 2\% do consumo global de energia. É esperado que, num futuro próximo, essa proporção
+de consumo energético se mantenha, com previsões de que o consumo deva chegar até cerca de 752 TWh, representando cerca de 2.13\% do consumo energético global. 
 
-Escrever bem é uma arte que exige muita técnica e dedicação e,
-consequentemente, há vários bons livros sobre como escrever uma boa
-dissertação ou tese. Um dos trabalhos pioneiros e mais conhecidos nesse
-sentido é o livro de Umberto~\citet{eco:09} intitulado \emph{Como se faz
-uma tese}; é uma leitura bem interessante mas, como foi escrito em 1977 e
-é voltado para trabalhos de graduação na Itália, não se aplica tanto a nós.
+Esse consumo energético elevado causado pela operação dos datacenters acaba tendo um elevado
+impacto ambiental, sendo notórios as emissões de gases causadores do efeito estufa (abreviados como $CO_{2}eq$) e também
+o consumo de água. Diferentes métodos de geração de energia elétrica possuem diferentes pegadas
+de carbono, onde, por exemplo, a fissão nuclear se caracteriza como um método com baixa emissão de $CO_{2}eq$, 
+enquanto métodos baseados na queima de combustíveis fósseis como o carvão ou gás natural emitem
+altas quantidades desses gases. 
 
-Sobre a escrita acadêmica em geral, John Carlis disponibilizou um texto curto
-e interessante~\citep{carlis:09} em que advoga a preparação de um único
-rascunho da tese antes da versão final. Mais importante que isso, no
-entanto, são os vários \textit{insights} dele sobre a escrita acadêmica.
+Além da intensidade de carbono variar de acordo com a fonte de geração, 
+temos que a composição das matrizes energéticas varia entre os países ou até mesmo entre diferentes
+regiões de um mesmo país, e principalmente, varia com o passar do tempo levando em conta um dia/semana
+e até mesmo de acordo com a estação do ano. Em países que tem apostado na descarbonização da rede,
+podemos ter uma predominância de energia solar na matriz energética de um determinado lugar, porém 
+com o chegar da noite, devido a impossibilidade da mesma, pode-se acabar queimando combustíveis
+fósseis para suprimir a demanda energética.
 
-Dois outros bons livros sobre o tema são \emph{The Craft of Research}~\citep{craftresearch}
-e \emph{The Dissertation Journey}~\citep{dissertjourney}. Além disso,
-a USP tem uma compilação de normas relativas à produção de documentos
-acadêmicos~\citep{usp:guidelines} que pode ser utilizada como referência.
+Não obstante o impacto ambiental decorrido da operação de datacenters, temos uma fração não desprezível desses gases
+incorporados no próprio processo de fabricação dos componentes dos nós dos datacenters, 
+incluindo CPU, GPU, memória, dentre outros. O que agrava esse cenário é que o é possível definir
+as emissões de carbono como um problema de estoque global: uma tonelada emitida em Nova York ou na China
+tem o mesmo efeito quando pensamos em planeta, com o dano sendo difundido no espaço. Caso os padrões de emissão atuais 
+não sejam controladas, as consequências previstas serão as mais variadas possíveis, com inundações de
+cidades costeiras inteiras, grandes períodos de secas e também chuvas torrenciais, causando a disrupção
+do processo agrícola, entre outros.
 
-Para a escrita de textos especificamente sobre Ciência da Computação, o
-livro de Justin Zobel, \emph{Writing for Computer Science}~\citep{zobel:14}
-é uma leitura obrigatória. O livro \emph{Metodologia de Pesquisa para
-Ciência da Computação} de Raul Sidnei~\citet{waz:20}
-também merece uma boa lida. Já para a área de Matemática, dois livros
-recomendados são o de Nicholas Higham, \emph{Handbook of Writing for
-Mathematical Sciences}~\citep{higham:19} e o do criador do \TeX{}, Donald
-Knuth, juntamente com Tracy Larrabee e Paul Roberts, \emph{Mathematical
-Writing}~\citep{knuth:96}.
+A outra faceta de impacto ambiental da operação dos datacenters é justamente o 
+consumo de água causado por eles. Estima-se que cerca de 2/3 desse consumo decorra
+indiretamente da quantidade de água consumida para gerar a energia elétrica que 
+abastecem esses centros, enquanto cerca de 1/4 são consumidos nos sistemas de resfriamento
+dos mesmos. Estimativas recentes atribuem cerca de 560 bilhões de litros sendo consumidos
+globalmente para a operação de datacenters. 
 
-Apresentar os resultados de forma simples, clara e completa é uma tarefa que
-requer inspiração. Nesse sentido, o livro de Edward~\citet{tufte01:visualDisplay},
-\emph{The Visual Display of Quantitative Information}, serve de ajuda na
-criação de figuras que permitam entender e interpretar dados/resultados de forma
-eficiente.
+Para piorar, boa parte dos datacenters estão situados 
+em regiões com um alto indíce de estresse hídrico, acarretando em uma exploração desproporcional 
+de fontes de águas em situações de estresse. Uma quantia de água consumida advinda de uma fonte
+hídrica em estresse, em um período de seca ou de alto uso por exemplo, acaba competindo diretamente
+com o abastecimento humano, agricultura ou outros usos societais fundamentais, tendo assim um
+custo comparativamente bem maior em relação a água consumida de um fonte em estado saudável.
 
-Além desse material, também vale muito a pena a leitura do trabalho de
-Uri \citet{alon09:how}, no qual apresenta-se uma reflexão sobre a utilização
-da Lei de Pareto para tentar definir/escolher problemas para as diferentes
-fases da vida acadêmica. A direção dos novos passos para a continuidade da
-vida acadêmica deveria ser discutida com seu orientador.
+Apesar disso, ainda não existe uma metodologia padronizada para realizar a contabilização
+da água consumida por infraestruturas de computação. A métrica de Water Usage Effectiveness (WUE),
+por exemplo, leva em conta apenas a água consumida para resfriamento (on-site), deixando de 
+fora a água consumida indiretamente na geração de energia utilizada. Além disso, ela se mostra incapaz
+de contabilizar o fator de estresse dado fatores geográficos e sazonais da água consumida. Por fim,
+boa parte dos fornecedores de Cloud não publicam métricas de eficiência hídrica, ou mesmo chegam a
+publicar a quantidade de águas consumidas nas suas operações.
 
-\section**{Considerações de estilo}
-\label{sec:consideracoes_preliminares}
+Com isso, boa parte dos estudos e artefatos relacionados a sustentabilidade computacional
+seguem focados majoritariamente na pegada de carbono. Porém, esses dois impactos não são
+sempre diretamente relacionados, a depender de fatores geográficos e temporais. A geração de energia elétrica
+via usinas eólicas, por exemplo, emite uma baixa quantidade de $CO_{2}$ e consume uma baixa quantia de água,
+enquanto a geração por fissão nuclear pode demandar uma grande quantia de água dependendo 
+do seu método de resfriamento, enquanto emite uma baixa quantia de $CO_{2}$. Portanto, uma intervenção
+poderia possívelmente reportar uma redução na sua pegada de carbono, enquanto acaba transferindo o impacto
+para o consumo de água, e ainda assim registrar isso simploriamente como ganho em uma métrica agregada.
+Consequentemente, avaliar qualquer intervenção em HPC com preocupação ambiental deve contabilizar ao menos
+essas duas pegadas de forma isolada primeiro, e posteriormente, de forma simultânea, analisando ganhos e perdas.
+
+\section**{O escalonador como ponto de intervenção}
+\label{sec:escalonador_como_intervencao}
 
 Normalmente, as citações não devem fazer parte da estrutura sintática da
 frase\footnote{E não se deve abusar das notas de rodapé.\index{Notas de rodapé}}.
