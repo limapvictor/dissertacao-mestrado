@@ -100,41 +100,76 @@ essas duas pegadas de forma isolada primeiro, e posteriormente, de forma simult�
 \section**{O escalonador como ponto de intervenção}
 \label{sec:escalonador_como_intervencao}
 
-Normalmente, as citações não devem fazer parte da estrutura sintática da
-frase\footnote{E não se deve abusar das notas de rodapé.\index{Notas de rodapé}}.
-No entanto, usando referências em algum estilo autor-data (como o estilo
-plainnat do \LaTeX{}), é comum que o nome do autor faça parte da frase. Nesses
-casos, pode valer a pena mudar o formato da citação para não repetir o nome do
-autor; no \LaTeX{}, isso pode ser feito usando os comandos
-\textsf{\textbackslash{}citet}, \textsf{\textbackslash{}citep},
-\textsf{\textbackslash{}citeyear} etc. documentados no pacote
-natbib \citep{natbib}\index{natbib} (esses comandos são compatíveis com biblatex
-usando a opção \textsf{natbib=true}, ativada por padrão neste modelo). Em geral,
-portanto, as citações devem seguir estes exemplos:
+De modo geral, sistemas HPC de produção recebem os programas que seus usuários
+desejam executar como jobs, que resumidamente, são um conjunto envolvendo o código
+em si, o número de máquinas requisitadas e um tempo máximo esperado de execução. 
+Esses jobs são enviados não diretamente para os sistemas operacionais dos nós dos sistemas,
+mas sim para um programa intermediário, o escalonador. Portanto, é o escalonador
+que decide em quais nós e quando um certo job deve rodar.
 
-\bgroup
-\footnotesize
-\begin{verbatim}
-Modos de citação:
-indesejável: [AF83] introduziu o algoritmo ótimo.
-indesejável: (Andrew e Foster, 1983) introduziram o algoritmo ótimo.
-certo: Andrew e Foster introduziram o algoritmo ótimo [AF83].
-certo: Andrew e Foster introduziram o algoritmo ótimo (Andrew e Foster, 1983).
-certo (\citet ou \citeyear): Andrew e Foster (1983) introduziram o algoritmo ótimo.
-\end{verbatim}
-\egroup
+Na literatura, pode-se encontrar diversos algoritmos e heurísticas que visam otimizar certos 
+aspectos na execução desses jobs, com alguns desses encontrando seu espaço nos sistemas em produção.
+O EASY backfilling é um dos algoritmos mais difundidos na prática, com uma ideia geral
+de simples implementação, fácil rastreio e também boa performance: o escalonador ordena a fila de
+execução pelo tempo de chegada dos jobs, executando o primeiro job da fila sempre que a quantidade
+de nós é suficiente. Ao mesmo tempo, o escalonador também tenta preencher possíveis nós ociosos com
+jobs que estão em posições posteriores na fila, mas com uma quantidade requisitada menor ou igual
+a de nós ociosos naquele momento. 
 
-O uso desnecessário de termos em língua estrangeira deve ser evitado. No entanto,
-quando isso for necessário, os termos devem aparecer \textit{em itálico}.
-\index{Língua estrangeira}
-% index permite acrescentar um item no indice remissivo
+Em consequência disso, o escalonador acaba se tornando o ponto focal de intervenção quanto a 
+prioridades acerca do funcionamento dos sistemas de HPC. Caso preocupações acerca do impacto ambiental
+sejam o ponto focal de um certo grupo de operadores, seria possível, por exemplo, deslocar a execução
+dos jobs para janelas de tempo onde a intensidade de carbono decorrente da matriz elétrica seja menor.
+Essa é a premissa do escalonamento consciente de carbono, estudado majoritariamente em infraestruturas
+de nuvem. Wiesner et al. reportou economias de até 20\% ao deslocar jobs tolerantes a atrasos para horários
+foras de pico ou para o fim de semana, enquanto Chen et al. alegou economias de até 67\% ao combinar
+deslocamentos temporais e geográficos.
 
-Uma prática recomendável na escrita de textos é descrever as
-legendas\index{Legendas} das figuras e tabelas em forma auto-contida: as
-legendas devem ser razoavelmente completas, de modo que o leitor possa entender
-a figura sem ler o texto em que a figura ou tabela é citada.\index{Floats}
+A maioria dos trabalhos sobre escalonamento consciente de carbono incorporam algum tipo de previsão
+como um dos seus componentes centrais nos seus algoritmos de decisão. Boa parte desses, inclusive, 
+integra previsões obtidas através de modelos de Machine Learning para prever as composições das matrizes 
+em um futuro próximo e poder agendar suas cargas de trabalho de acordo. Este trabalho se propõe a 
+não adotar modelos preditivos treinados, optando por tratar o grau de informação sobre as intensidades
+futuras como um dos seus fatores experimentais, variando-o entre a total ausência e o conhecimento perfeito,
+medindo portanto quando de previsão é realmente necessária. Além disso, mesmo trabalhos com previsão
+alegam ter suas reduções na pegada por meio do deslocamento temporal limitadas por fatores como baixa variabilidade local na matriz energética,
+cargas de trabalho contínuas e dependentes de entradas de usuários, além da presença de cargas de trabalho
+não-interrompíveis.
 
-\section**{Ferramentas bibliográficas}
+Uma quantia significativa de estudos sobre esse tema de escalonamento ambientalmente consciente 
+argumenta que as reduções obtidas através do deslocamento geográfico dos jobs são significativamente
+maiores em relação as reduções obtidas através do deslocamento temporal. Porém, quando se refere a sistemas 
+HPC,nota-se que boa parte dos jobs acaba operando em um conjunto de dados significativamente maior quando
+comparado com os de aplicações comumente executadas em nuvem, o que acaba por dificultar a migração
+geográfica de jobs em HPC. Além disso, cada job em HPC tem uma qualidade de certa rigidez quando comparados às
+aplicações em nuvem, solicitando uma quantidade exata de nós e por um certo período de tempo esperado também. Por fim,
+apesar de muitos centros implementarem esquemas de preempção, o processo de salvar o estado atual (checkpoint) em jobs
+MPI é custoso.
+
+Como definido anteriormente, um job em HPC possui em sua especificação um número de nós e uma quantidade
+máxima de execução necessários para rodar. Como esses são constantes durante a execução do job, e com
+um modelo que considera a potência de um nó em execução como constante também, a energia ativa de um job
+é demonstrada como invariante ao escalonamento. A partir disso, restam ao controle do escalonador duas
+quantidades: a intensidade que multiplica a energia ativa, controlada através do deslocamento da execução do job
+ao redor do tempo; e o tempo que o job espera na fila. Além disso, o adiamento na execução do job só compensa
+caso seja previr uma queda na intensidade ambiental de forma que se supere o custo ocioso acumulado, ou seja,
+sem informação sobre o futuro, adiar nunca compensa.
+
+Portanto, observa-se que as duas alavancas acabam se opondo, visto que reduzir a intensidade durante 
+o período ativo custa ociosidade, e a máquina ociosca durante a espera não produz nada, impossibilitada
+de executar outros jobs. Com isso, é possível adicionar uma terceira variável sobre controle do escalonador:
+o controle sobre a contiguidade dos jobs. Ao interromper-se um job, libera-se os seus nós para possíveis outros jobs,
+convertendo energia ociosa em energia útil. Assim, adiciona-se também um terceiro preço, que é a energia de 
+reexecução, termo este que é capaz de aumentar a energia ativa.
+
+Consequentemente, conclui-se que existe um limite tangível e mensurável para o que qualquer política 
+de escalonamento pode reduzir de impacto ambiental sob esses diferentes modelos. Com esse limite desconhecido,
+não é possível distinguir uma política que aproveitou quase todo o espaço de otimização disponível
+em relação a outra que aproveitou pouco de um espaço amplo. Por consequência, a pergunta pertinente não foca
+apenas em quanto uma determinada heurística ecnomiza, mas sim em quanto há a economizar e que fração desse total
+é alcançável por políticas de escalonamento que operem sem modelos preditivos treinados. 
+
+\section**{Problema e lacuna}
 
 Embora seja possível pesquisar por material acadêmico na Internet usando
 sistemas de busca ``comuns'', existem ferramentas dedicadas, como o
