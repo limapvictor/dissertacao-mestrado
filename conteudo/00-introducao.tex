@@ -171,38 +171,47 @@ apenas em quanto uma determinada heurística ecnomiza, mas sim em quanto há a e
 
 \section**{Problema e lacuna}
 
-Embora seja possível pesquisar por material acadêmico na Internet usando
-sistemas de busca ``comuns'', existem ferramentas dedicadas, como o
-\textsf{Google Scholar}\index{Google Scholar} (\url{scholar.google.com}).
-O \textsf{Web of Science}\index{Web of Science} (\url{webofscience.com})
-e o \textsf{Scopus}\index{Scopus} (\url{scopus.com}) oferecem recursos
-sofisticados e limitam a busca a periódicos com boa reputação acadêmica.
-Essas duas plataformas não são gratuitas, mas os alunos da USP têm
-acesso a elas através da instituição. Algumas editoras, como a ACM
-(\url{dl.acm.org}) e a IEEE (\url{ieeexplore.ieee.org}), também têm
-sistemas de busca bibliográfica. Todas essas ferramentas são capazes de
-exportar os dados para o formato .bib, usado pelo \LaTeX{} (no Google
-Scholar, é preciso ativar a opção correspondente nas preferências).
-O sítio \url{liinwww.ira.uka.de/bibliography} também permite buscar e
-baixar referências bibliográficas relevantes para a área de computação.
+O entendimento da extensão completa dos impactos ambientais decorrentes
+dos sistemas de HPC seria de grande importância, primeiramente, para pesquisadores  
+que desejem entender e intervir nessa que vem sendo cada vez mais uma ferramenta chave mas mais
+diversas pesquisas e áreas. Além disso, serviria de auxílio ao habilitar decisões ambientalmente
+informadas por parte dos operadores desses sistemas, e, por fim, instrumentaria o desenvolvimento
+de regulações mais efetivas por parte de governadores e legisladores em geral. Porém, o que se encontra 
+na literatura da área aparenta ser uma base de conhecimento dispersa e fragmentada, com estudos 
+geralmente focados em aspectos individuais, sem abordagens mais holísticas, além da ausência ou despadronização
+nos relatórios ou mesmo monitoramento de tais impactos ambientais. 
 
-Lamentavelmente, ainda não existe um mecanismo de verificação ou validação
-das informações nessas plataformas. Portanto, é fortemente sugerido validar
-todas as informações de tal forma que as entradas bib estejam corretas.
-De qualquer modo, tome muito cuidado na padronização das referências
-bibliográficas: ou considere TODOS os nomes dos autores por extenso, ou TODOS
-os nomes dos autores abreviados. Evite misturas inapropriadas.\looseness=1
+A partir dessa impressão, foi realizado um mapeamento sistemático na literatura, do qual o autor
+deste texto foi um dos co-autores. No mapeamento, os relatos encontrados foram classificados a partir de quatro
+facetas principais: impactos ambientais, visando identificar quais impactos (emissão de 
+carbono, uso de água, materiais/resíduos, biodiversidade/ecossistemas) o trabalho aborda; estágios 
+do ciclo de vida, visando agrupar os trabalhos de acordo com o estágio (produção, operacional ou fim de vida)
+dos sistemas em questão; locus no sistema, visuando situar em que camada (instalação e 
+infraestrutura de energia, hardware, software e cargas de trabalho) a análise ou a intervenção se dá;
+e alavanca de gestão e intervenção, visando distinguir como o impacto é tratado (medição e contabilidade,
+projeto de infraestrutura, otimização de carga/tempo de execução, incentivos e política).
 
-Apenas uma parte dos artigos acadêmicos de interesse está disponível livremente
-na Internet; os demais são restritos a assinantes. A CAPES assina um grande
-volume de publicações e disponibiliza o acesso a elas para diversas
-universidades brasileiras, entre elas a USP, através do seu portal de
-periódicos (\url{periodicos.capes.gov.br}). Existe uma extensão para os
-navegadores Chrome e Firefox (\url{www.infis.ufu.br/capes-periodicos})
-que facilita o uso cotidiano do portal.
+A compreensão obtida através do mapeamento indica para uma concentração da literatura quanto ao estudo
+do impacto das emissões de carbono, no estágio operacional dos sistemas de HPC, na camada da instalação
+em si dos sistemas e com análise centrada na medição dessas emissões. Água aparece em apenas 5 dos 
+62 relatos totais, sempre na camada da instalação e associada ao resfriamento dos componentes dos sistemas
+HPC. Nenhum dos relatos que tratam de água o faz na camada de software e cargas de trabalho, e nenhum 
+recorre à otimização, e nenhum recorre à otimização de tempo de execução como alavanca de gestão intervenção.
+Contrariamente, para emissões de carbono, esses mesmos recortes reúnem 28 e 21 relatos, respectivamente.
 
-Para manter um banco de dados organizado sobre artigos e outras fontes
-bibliográficas relevantes para sua pesquisa, é altamente recomendável
-que você use uma ferramenta como Zotero~(\url{zotero.org})\index{Zotero}
-ou Mendeley~(\url{mendeley.com})\index{Mendeley}. Ambas podem exportar
-seus dados no formato .bib, compatível com \LaTeX{}.
+O desenvolvimento de um escalonamento consciente de água exigiria a presença de sinais de consumo
+de água em uma granularidade compatível com a dos ciclos de decisão de um escalonador, na casa dos segundos
+ou minutos. Porém, a distância na maturidade instrumental entre os sinais de carbono e água ainda é pronunciada.
+De ínicio, não existe uma ferramenta difundida que publica a intensidade hídrica derivada de uma rede elétrica,
+como o Electricity Maps faz para carbono. Não obstante, os fatores de intensidade hídrica das diferentes
+fontes de energia elétrica são bem menos maduros quando comparados com seus equivalentes para carbono, dado que 
+enquanto as emissões por tecnologia constam de bases de ciclo de vida revisadas e atualizadas periodicamente, o
+consumo de água repousa predominantemente sobre um conjunto restrito de referências e com sua validade
+contestada de certas formas. 
+
+Portanto, percebe-se que a falta de intervenções sobre cargas de trabalho incluindo água como alvo
+não decorre de um desinteresse científico, mas sim de uma lacuna de dados e ferramentas. Além dos sinais
+hídricos, para medir o efeito que uma decisão de escalonamento tem sobre uma pegada ambiental, é necessário
+contabilizá-lo ao longo da execução do escalonador, instante a instante. Os simuladores de HPC 
+estabelecidos atualmente não oferecem essa contabilidade sobre as pegadas de carbono/hídrica, com uma
+extensão recente cobrindo apenas a pegada de carbono operacional. 
