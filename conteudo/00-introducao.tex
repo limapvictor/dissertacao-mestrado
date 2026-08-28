@@ -215,3 +215,23 @@ hídricos, para medir o efeito que uma decisão de escalonamento tem sobre uma p
 contabilizá-lo ao longo da execução do escalonador, instante a instante. Os simuladores de HPC 
 estabelecidos atualmente não oferecem essa contabilidade sobre as pegadas de carbono/hídrica, com uma
 extensão recente cobrindo apenas a pegada de carbono operacional. 
+
+O desenvolvimento desse instrumental para contabilizar as pegadas ambientais permitiria, além da construção
+de novas intervenções sobre cargas de trabalho, a medição do teto factível de redução de impacto ambiental.
+O teto teórico máximo é tem seu cálculo possibilitado através da otimização máxima possível para cada
+job de uma carga de trabalho, ou seja, para cada job de duração estimada T, escolhe-se a janela de tamanho
+T com menor intensidade em todo o traço. Porém, esse cálculo não é realista para o mundo real, visto que 
+além de ignorar a capacidade de um sistema de HPC, que tem um número fixo de nós durante o tempo, além de 
+considerar que um job poderia ser alocado para uma janela anterior a sua própria submissão. O teto factível
+é obtido então a partir do conhecimento do traço inteiro de maneira clarividente em conjunto com escolhas
+gulosas pelas melhores janelas respeitando capacidade, chegadas e reservas. O simulador garante que o resultado
+é atingível no mundo dado que ele efetivamente construiu um escalonamento que o atinge.
+
+É justamente a partir desses tetos que é possível obter a dimensão real da qualidade de uma heurística de
+escalonamento. Sem isso, reportar 3\% de reduções nas emissões de carbono pode parecer um ganho irrisório.
+Porém, por exemplo, caso seja estabelecido que o teto de redução nas emissões de carbono é de 4\%, a heurística
+na verdade acaba se mostrando muito competente, visto que alcançou 75\% das reduções disponíveis.
+
+TESE.
+
+\section**{Objetivo e questões de pesquisa}
