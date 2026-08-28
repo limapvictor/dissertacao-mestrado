@@ -235,3 +235,33 @@ na verdade acaba se mostrando muito competente, visto que alcançou 75\% das red
 TESE.
 
 \section**{Objetivo e questões de pesquisa}
+
+Este trabalho tem como objetivo delimitar o espaço de redução máximo nas emissões de carbono
+e consumo de água acessível a um escalonador em lote de sistemas HPC, e também determinar
+qual fração desse espaço é alcançável através da implementação de políticas simples de escalonamento,
+sem o uso de modelos preditivos treinados. Para isso, foi desenvolvido um modelo de contabilização
+de pegadas ambientais integrado a um simulador de escalonamento de sistemas HPC, construído um 
+ambiente experimental a partir de sinais de redes reais e traços de cargas de trabalho de sistemas 
+HPC em produção, e por fim, avaliadas políticas que diferem entre si quanto ao mecanismo de decisão
+e quanto ao grau de informação sobre o comportamento futuro desses sinais ambientais.
+
+Consequentemente, a questão de pesquisa primária que este trabalho visa responder é \emph{"Qual é 
+o espaço de redução nas emissões de carbono e consumo de água acessível a um escalonador em lote
+de sistemas HPC, e que fração dele heurísticas simples conseguem capturar?"}. A partir dessa questão
+primária, é possível derivar outras cinco questões subordinadas, com as duas primeiras estabalecendo
+o referencial teórico e factível discorrido anteriormente, e as três seguintes avaliando políticas
+de escalonamento contra esse referencial.
+
+\begin{description}
+    \item[QP1] Como a composição da matriz elétrica de uma região determina o teto teórico, ao longo do dia,
+mês e das estações?
+    \item[QP2] Quanto do teto teórico total permanece factível quando consideradas as restrições
+práticas de escalonamento?
+    \item[QP3] Os objetivos de redução das emissões de carbono e redução do consumo de água são 
+convergentes ou divergentes?
+    \item[QP4] Quanta informação sobre intensidades futuras é necessária para capturar o teto factível
+    \item[QP5]   
+\end{description}
+
+Define-se como \emph{simples} uma política de escalonamento cuja regra de decisão não envolve treinamento
+ou 
