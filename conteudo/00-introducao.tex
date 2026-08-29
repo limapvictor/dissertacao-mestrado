@@ -260,8 +260,39 @@ práticas de escalonamento?
     \item[QP3] Os objetivos de redução das emissões de carbono e redução do consumo de água são 
 convergentes ou divergentes?
     \item[QP4] Quanta informação sobre intensidades futuras é necessária para capturar o teto factível
-    \item[QP5]   
+    \item[QP5] -   
 \end{description}
 
-Define-se como \emph{simples} uma política de escalonamento cuja regra de decisão não envolve treinamento
-ou 
+Define-se como \emph{simples} uma política de escalonamento cuja regra de decisão não envolve a utilização
+de um ou mais modelos preditivos ajustados aos dados, e também cujo custom computacional por decisão seja aritmético.
+O grau de informação sobre intensidades futuras não se encaixa nessa definição, dado que ele é tratado
+como um dos fatores experimentais, variado em níveis declarados de maneira explícita. Defini-se como 
+\emph{competitiva} uma política que promove a redução da pegada operacional em relação a pegada gerada
+ao seguir a política baseline EASY backfilling sem aumentar desbalanceadamente o mean bounded slowdown.
+O escalonamento por si só não é capaz de alterar o tempo de execução de um job, tendo o controle apenas
+da quantidade que um job espera na fila de execução.
+
+Este trabalho não considera a migração geográfica dos jobs entre diferentes sistemas de HPC, não modela
+a variação de potência intra-job e também não trata o gerenciamento de potência em execução de hardware.
+
+\section**{Contribuições}
+
+\begin{description}
+    \item[Modelo de contabilização de pegada] Extensões nos simuladores de escalonadores de HPC para
+contabilizar por job as pegadas de carbono e hídrica, tanto operacionais quando incorporadas, instante
+a instante ao logo da execução do mesmo. Torna possível comparar escalonamentos alternativos quanto
+à pegada, e não apenas quanto à energia exclusivamente. Essa distinção é necessária visto que a intensidade
+de carbono/água varia dentro da própria execução do job. 
+    \item[Ambiente experimental reprodutível] Sinais de intensidade de emissões de carbono e consumo de água
+derivados de geração real de três países com composições elétricas diferentes, em resolução de 15 minutos,
+combinados a traços de carga de produção de sistemas HPC e plataformas modeladas para uso dos simuladores.
+Cada execução pode ser repetida e reparametrizada, além da possibilidade de substituição do modelo de potência,
+sinal de rede ou carga sem reconstruir o pipeline.
+    \item[Referencial de teto] O teto teórico, calculado analiticamente baseado em um cenário não alcançável na prática,
+e o teto factível, obtido através de um escalonador clarividente. Torna uma redução relatada interpretável,
+observado que sem um referencial, não é possível realizar a distinção entre uma política que aproveitou
+boa parte do espaço disponível em relação a uma política que aproveitou pouco de um espaço com amplas margens.
+    \item[Mapeamento sistemático dos impactos ambientais em HPC] Um mapeamento sistemático dos impactos ambientais
+em computação de alto desempenho, visando entender o que pesquisadores tem buscado entender e como intervir.
+O autor desta dissertação participou da triagem manual dos registros candidatos.
+\end{description}
