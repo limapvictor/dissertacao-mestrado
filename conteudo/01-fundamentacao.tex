@@ -4,88 +4,76 @@
 
 \chapter{Fundamentação}
 
-Fica a critério do aluno definir os aspectos relacionados à aparência da
-tese, como o tamanho de fonte, margens, espaçamento, estilo de referências,
-cabeçalho, etc., considerando sempre o bom senso.
+\section{Escalonamento em lote em HPC}
 
-A CPG, em reunião realizada em junho de 2007, aprovou que as
-teses/dissertações deverão seguir o formato padrão por ela definido.
-Esse padrão refere-se aos itens que devem estar presentes nas teses/dissertações
-(e.g. capa, formato de rosto, sumário, etc.), e não à formatação do documento.
-Ele define itens obrigatórios e opcionais, conforme segue:\index{Formatação}
-\index{Tese/Dissertação!itens obrigatórios}
-\index{Tese/Dissertação!itens opcionais}
+Sistemas de computação de alto desempenho são complexos por natureza, com cada nó sendo composto
+por inúmeras unidades de processamento, sejam CPUs ou GPUs, além dos dispositivos de memória (RAM, SSDs)
+e dispositivos de rede necessários para habilitar e suportar o enorme volume de computações simultâneas
+nesses nós. Advinda dessa complexidade, os usuários finais desses sistemas enviam os seus trabalhos para
+um software intermediário, o Sistema de Gerenciamento de Trabalhos e Recursos (do inglês Resource and Job
+Management System, ou RJMS), que pode ser resumido como o escalanador do sistema, observado que sua função
+principal é decidir em que máquinas e em que momento um dado trabalho computacional deve ser executado. 
+Esses trabalhos, ou \emph{jobs}, nada mais são do que aplicações computacionais, como programas ou scripts,
+em conjunto com a quantidade de recursos requisitados, tempo de submissão, e outras informações pertinentes
+para a execução do mesmo.
 
-\begin{itemize}
-  \item \textsc{Capa} (obrigatória)
-  \begin{itemize}
-    \item O IME usa uma capa padrão de cartolina para todas as
-    teses/dissertações. Essa capa tem uma janela recortada por onde se
-    vê o título e o autor do trabalho e, portanto, a capa impressa do
-    trabalho deve incluir o título e o autor na posição correspondente da
-    página. Ela fica centralizada na página, tem 100mm de largura, 60mm de
-    altura e começa 47mm abaixo do topo da página.
+Para realizar tal função, o escalanador deve então decidir o modo para como compartilhar seus recursos disponíveis
+entre os jobs requisitantes em um certo momento. Os dois esquemas principais de compartilhamento são o \emph{time-sharing},
+onde um mesmo recurso é compartilhado entre diversos jobs, e com esses tendo a posse dos recursos por 
+pequenas fatias de tempo; e o \emph{space-sharing}, onde um recurso é atribuído exclusivamente a um job até a finalização do mesmo. 
+Por exemplo, com time-sharing, uma mesma unidade de processamento teria a posse das suas 
+threads distribuída entre vários jobs por um curto período de tempo, enquanto com space-sharing
+todas as threads estariam no controle do mesmo job por todo seu período de execução. Jobs que possuem
+interação com o usuário durante sua execução (interativos) são preferívelmente executados em máquinas ou
+processadores em um esquema de time-sharing, enquanto para jobs que rodam sem a necessidade de interação com 
+o usuário (batch) se opta por um esquema de space-sharing.
 
-    \item O título da tese/dissertação deverá começar com letra maiúscula
-    e o resto deverá ser em minúsculas, salvo nomes próprios.
+Jobs são caracterizados em relação a duas dimensões espaciais: o seu comprimento, que diz respeito
+ao tempo de execução decorrido de um job; e sua largura, que caracteriza um job a partir da quantidade
+de recursos requisitados por tal. Sobre a largura, é possível classificar um job em uma de quatro
+categorias: \textbf{rígidos}, onde o número de recursos que o escalonador atribui a um job é exatamente
+igual ao número de recursos requisitados pelo usuário, durante toda a execução do job; \textbf{moldável},
+onde o escalonador por si mesmo atribui um número de recursos a um certo job, fixo durante toda a execução
+do mesmo; \textbf{evolutivo} onde o usuário desenvolve o job de uma maneira que a quantidade de recursos
+necessários muda durante a sua execução, cabendo ao escalonador satisfazer tais atribuições; ou 
+\textbf{maleável}, onde o escalonador por si próprio atribui um número de recursos e também controla
+possíveis incorporações ou liberações de recursos.
 
-    \item O nome do aluno(a) deverá ser completo e sem abreviaturas.
+A capacidade de estimar o comprimento de um job é de grande importância para a maioria das políticas 
+de escalonamento. Apesar de alguns trabalhos na área apresentarem soluções quanto a estimação automática
+do tempo de execução dos jobs por parte do próprio escalonador, na prática a maioria dos sistemas acaba
+demandando que os usuários submitam o tempo de execução que eles esperam que o job tome, nesse caso 
+funcionando como um tempo de execução máximo, ou \textit{walltime}. Apesar dos usuários possuírem a tendência
+de superestimar esse tempo de execução máximo, visto que a subestimação do walltime levaria a finalização
+forçada do job, é a solução utilizada na prática, inclusive com relatos alegando que essa superestimação
+acaba sendo benéfica de acordo com a política de escalonamento utilizada. Esse tempo máximo declarado faz parte
+do modelo de job "rígido" dominante em sistemas de HPC em produção e utilizado por esse trabalho, 
+onde os jobs são executados por máquinas em esquema de space-sharing e com largura rígida.  
 
-    \item É preciso explicitar se é uma tese ou dissertação (para
-    obtenção do título de doutor, tese; para obtenção do título de
-    mestre, dissertação).
+A grande maioria dos escalonadores em produção seguem uma lógica de enfileiramento, atribuindo recursos
+disponíveis em determinado momento para jobs que estão esperando em uma fila, de acordo com a própria 
+ordenação dessa fila. Diversos critérios de ordenação da fila são utilizados na prática, como pelo tempo
+de chegada na fila, pelo tempo de execução máxima do job, seja crescente ou decrescente, pelo número de
+recursos requisitados. O critério do tempo de chegada do job na fila (ou \textit{First-Come-First-Serve}, 
+FCFS) é um dos mais utilizados na prática, dada a simplicidade da sua implementação e explicabilidade. 
+Entretanto, esse critério aplicado sozinha corre o risco de causar a chamada fragmentação na máquina, 
+com uma parte considerável dos nós do sistema tornando-se ociosos enquanto o job na posição mais 
+prioritária da fila, a cabeça, espera pela liberação dos recursos necessários para sua execução.
 
-    \item O nome do programa deve constar da capa (Matemática,
-    Matemática Aplicada, Estatística, Ciência da Computação ou
-    Mestrado Profissional em Ensino de Matemática).
+Desenvolvidor para integrar o escalonador EASY (de Extensible Argonne Scheduling sYstem), gerenciador 
+do IBM SP no Laborátório Nacional de Argonne, o \emph{backfilling} é um mecanismo que visa lidar com os
+nós ociosos do sistema devidos a bloqueio pela cabeça da fila, sendo altamente implementado nos 
+sistemas em produção. A partir do momento em que o job na cabeça da fila não consegue ser executado
+dada a falta de recursos em relação aos seus requisitos, o escalonador começa a varrer os jobs posteriores
+na fila. Apoiado nos tempos de execução máximo estimados pelos usuários, o escalonador checa se um 
+job posterior na fila pode ou não ser executado no momento atual. Para isso, ele deve requisitar uma
+quantidade de recursos menor ou igual a disponível naquele momento, e seu deslocamento não deve atrasar
+a execução do job na cabeça da fila. 
 
-    \item Também devem constar o nome completo do orientador e do
-    co-orientador, se houver.
-
-    \item Se o aluno recebeu bolsa, deve-se indicar a(s) agência(s).
-
-    \item É preciso informar o mês e ano do depósito ou da entrega da
-    versão corrigida.
-  \end{itemize}
-
-  \pagebreak % Às vezes, o uso da força é inevitável ;-)
-
-  \item \textsc{Folha de rosto} (obrigatória, tanto para a versão
-  depositada quanto para a versão corrigida)
-  \begin{itemize}
-    \item O título da tese/dissertação deverá seguir o padrão da capa.
-
-    \item Deve informar se se trata da versão original ou da versão
-    corrigida (veja mais sobre isso abaixo); no segundo caso, deve
-    também incluir os nomes dos membros da banca.
-  \end{itemize}
-
-  \item \textsc{Agradecimentos} (opcional)
-
-  \item \textsc{Resumo}, em português (obrigatório)
-
-  \item \textsc{Abstract}, em inglês (obrigatório)
-
-  \item \textsc{Sumário} (obrigatório)
-
-  \item \textsc{Listas} (opcionais)
-  \begin{itemize}
-    \item Lista de abreviaturas
-    \item Lista de símbolos
-    \item Lista de figuras
-    \item Lista de tabelas
-  \end{itemize}
-
-  \item \textsc{Referências} (obrigatório)
-
-  \item \textsc{Índice remissivo} (opcional\footnote{O índice remissivo
-   pode ser muito útil para a banca; assim, embora seja um item opcional,
-   recomendamos que você o crie.})
-\end{itemize}
-
-Ao terminar sua tese/dissertação, você deve entregar uma cópia (digital) dela
-para a CPG. Após a defesa, você tem 30 dias para revisar o texto e incorporar
-as sugestões da banca. Assim, há duas versões oficiais do documento: a versão
-original e a versão corrigida, o que deve ser indicado na folha de rosto.
-\index{Tese/Dissertação!versões}
-
+O EASY backfilling garante que a o job na cabeça da fila não terá sua execução adiada
+por jobs posteriores a ele caso os nós ociosos sejam ocupados, porém o mesmo não pode ser 
+ditos dos outros jobs. Por isso, essa variação também é conhecida como backfilling \emph{agressivo},
+em contraste com versões mais conservadoras, que garantem que um certo número de jobs posteriores
+ao job prioritário ou mesmo nenhum job da fila tenha sua execução delegada por conta do mecanismo
+de backfilling. No fim das contas, o EASY é o baseline consolidado, pensando tanto nos
+escalonadores dos sistemas reais quanto na literatura de políticas de escalonamento.
