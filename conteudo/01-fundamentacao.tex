@@ -171,14 +171,62 @@ Outros impactos ambientais, como resíduos materiais ou impactos sobre a biodive
 e por isto, não são conciliáveis com o desenvolvimento de uma política de escalonamento que realiza decisões
 em tal granularidade horária.
 
-O termo "carbono" é usado a partir da definição utilizada pela Green Software Foundation, onde o termo
-é utilizado para se referir a todoo grupo de gases cuja emissões contribuem para o aquecimento global. Para
+O termo "carbono" é usado a partir da definição utilizada pela Green Software Foundation, referindo-se 
+a todo o grupo de gases cuja emissões contribuem para o aquecimento global. Para
 calcular a quantidade de carbono emitido decorrente da operação de um sistema computacional, ou, resumidamente, 
-a pegada de carbono, é necessário multiplicar a energia elétrica consumida pela intensidade de carbono da 
-eletricidade. A intensidade de carbono da eletricidade é a quantidade de carbono emitida para gerar uma certa 
-quantidade de energia elétrica (geralmente um kWh), variando ao redor do ano e também pela região onde a 
-energia elétrica foi gerada. 
+a pegada de carbono, é necessário multiplicar a energia elétrica consumida para alimentar o hardware 
+pela intensidade de carbono da eletricidade. A intensidade de carbono da eletricidade é a quantidade de carbono emitida para gerar uma certa 
+quantidade de energia elétrica, geralmente expressa em $gCO_{2}eq/kWh$, ou seja, gramas de $CO_{2}$ e gases equivalentes
+emitidos por kWh de energia elétrica gerada.
 
+Simplificadamente, definimos fonte como uma categoria de produção de energia elétrica (por queima de carvão, fissão nuclear, 
+via mecanismos eólicos), e associamos a cada uma dessas categorias um fator fixo de emissão de carbono por unidade de
+energia gerada. Cada região geográfica possui uma certa composição de rede diferente, onde essa composição é a soma
+das participações de cada fonte no total de energia gerado em um certo instante de tempo. Além disso, essa composição de rede
+também muda de acordo com o passar do dia e das estações, visto que certas fontes são priorizados ou despriorizadas 
+de acordo com sua capacidade de produção em cada momento. Por exemplo, pode ser que uma certa região tenha sua matriz elétrica composta por 50\% de energia solar
+e 50\% de energia nuclear durante o dia, enquanto pelo período da noite sua composição seja de 30\% de energia nuclear
+e os outros 70\% pela queima de carvão. Logo, como a intensidade de carbono varia ao passar do tempo, o escalonador
+tem o poder de controlar a sua pegada de carbono a partir das suas decisões de quando e quais jobs rodar.
+
+Em vista disso, a pegada de carbono de um sistema de HPC é um impacto unicamente indireto, resultante das emissões 
+realizadas pelas fontes para produção da energia elétrica consumida naquele instante. Em contrapartida, 
+a pegada hídrica de um sistema de HPC é composta pelo consumo direto e indireto de água. No que tange 
+o consumo indireto, a água funciona analogamente ao carbono, associando um fator fixo de consumo de água 
+por unidade de energia gerada para cada categoria de produção de energia elétrica, expresso geralmente em L/kwH. 
+Disso, o consumo indireto de água é o produto entre a energia elétrica em determinando instante e a intensidade
+de água ponderada da rede naquele instante. Por outro lado, o consumo direto é a contabilização do volume de água
+consumida por uma determinada instalação para o abastecimento dos seus sistemas de resfriamento. Em ambos os casos,
+o que se contabiliza é a água consumida, isto é, a parcela de água retirada de uma fonte de água que não retorna a mesma,
+em contraste com o volume total retirado, que inclui também a parcela de água que retorna a fonte.
+
+A série de normas ISO/IEC 30134 tem por objetivo padronizar como a performance de um datacenter é medida.
+A norma entende datacenter como qualquer centro com o objetivo primário de realizar computações, de um centro
+de computação em hiper-escala a uma sala de servidores de uma empresa, e portanto, se aplica a centros 
+com sistemas de HPC. A métrica mais difundida da norma é a \emph{Power Usage Effectiveness}, ou PUE, que mede
+a efetividade da energia gasta em um datacenter ao dividir a energia total consumida pelo datacenter pela energia
+consumida apenas pelos seus recursos computacionais. Outra métrica de interesse é a \emph{Water Usage Effectiveness}, ou WUE,
+que mede a quantidade de água consumida no datacenter por unidade de energia consumida por seus recursos computacionais.
+A importância da contabilização da WUE como uma medida separada é ressaltada ao levar em conta que certas técnicas
+de resfriamento possuem uma ótima eficiência energética, mas um altíssimo consumo de água associados. Nenhuma dessas
+duas métricas está sob controle do escalonador, pois elas são derivadas das características e escolhas da instalação,
+permancendo fixos enquanto tal está no estágio operacional. O que o escalonador tem controle sobre é a energia de 
+TI que atravessa esses fatores, sendo por essa via que as decisões chegam ao impacto final de carbono e água.
+
+A pegada de carbono e a pegada hídrica não são totalmente colineares, dado que uma mesma matriz elétrica
+pode ser caracterizada como de baixa intensidade de carbono e uma alta intensidade hídrica, ou vice-versa,
+dependendo das fontes de produção de energia predominantes em sua composição. Enquanto fontes de geração
+nuclear e hidrelétrica são caracterizadas por baixas emissões de carbono e um alto consumo de água,
+eólica e fotovoltaica são baixas para as duas dimensões. Essa divergência também está presente em possíveis
+intervenções, onde, por exemplo, a captura de carbono em certas usinas térmicas acaba reduzindo as emissões de carbono
+ao custo de um aumento significativo no consumo de água. Uma decisão de escalonamento que visa reduzir a pegada
+de carbono, portanto, não necessariamente irá reduzir a pegada hídrica, podendo inclusive aumentá-la.
+
+Ao longo desta dissertação, as intensidades de carbono e de água são tratadas como entradas de proveniência
+exterior. Um centro de HPC não tem a capacidade de alterar a composição de geração da rede que o alimenta,
+portanto essa também a exterior ao controle do escalonador. O que ele tem o poder de controlar é o instante
+em que cada job se expõe a essas intensidades, sendo essa a única forma pela qual uma decisão de escalonamento
+interfere no volume das pegadas operacionais.
 
 \section{Simulação de RJMS}
 
