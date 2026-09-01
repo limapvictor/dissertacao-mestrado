@@ -135,3 +135,84 @@ de desemepnho apresentadas acima são todas funções que tem como parâmetros o
 da execução. O restante deste capítulo visa mostrar que a pegada ambiental de um job é uma função dessas mesmas
 duas quantidades, e que é através disso que o escalanador se posiciona como um objeto de interesse ambiental passível
 de intervenção. 
+
+\section{Pegadas ambientais em computação}
+
+Tomando a norma ISO 14001:2015 como base, define-se impacto ambiental como qualquer mudança causada
+ao meio ambiente resultantes das atividades de uma organização, tanto benéficos quanto prejudiciais. O padrão
+se aplica a qualquer organização, definida aqui genericamente como um grupo de pessoas com funções, responsabilidades
+e autoridades para alcançar um determinado objetivo, que tem sua operação em um ambiente que engloba
+ar, água, terra, fauna, flora, recursos naturais e outros seres humanos. No contexto de HPC, essas organizações
+incluem instituições de pesquisa, laborátórios nacionais e entidades que realizam o gerenciamento de infraestruturas
+de supercomputadores. Logo, as atividades nesse caso abrangem todo o ciclo de vida de um sistema de HPC, 
+desde a extração dos materiais necessários para a manufatura dos recursos computacionais, passando pela 
+própria construção da instalação, posteriormente pelo consumo de energia demandado pela operação do centro,
+além do descarte dos materiais eletrônicos não mais usados.
+
+O ciclo de vida de sistemas de HPC se divide em três estágios, com cada um deles sendo vinculado com impactos
+ambientais distintos: o estágio de \textit{produção} abrange as atividades que moldam o sistema em si,
+como o planejamento e construção da instalação, ou a manufatura dos componentes do sistema como CPUs, GPUs,
+RAMs ou dispositivos de rede. Seus impactos são definidos como incorporados, advindos da extração dos materiais,
+manufatura dos componentes e transporte; o estágio \textit{operacional} abrange as atividades do sistema
+em funcionamento, como o escalonamento dos jobs, gerenciamento de recursos e dos sistemas de resfriamento. 
+Seus impactos decorrem majoritariamente do consumo de energia elétrica necessária para operação dos sistemas 
+computacionais e da água utilizada nos sistemas de resfriamento; e o estágio de \textit{fim-de-vida}, que abrange
+as atividades relacionadas ao tratamente dos recursos de hardware que não tem mais serviço para o sistema, 
+como descarte, reciclagem dos materiais ou reuso. Seus impactos vêm dos fluxos de resíduos e materiais residuais
+que permanecem após que o hardware deixa de ser útil para aquele sistema.
+
+Esta dissertação intervém exclusivamente no estágio operacional de um sistema de HPC, porque esse é o único
+em que mudanças no escalonador são capazes de inferir mudanças nos impactos ambientais gerados. Sob o modelo adotado,
+os impactos incorporados são atributos fixos da plataforma, logo nenhuma decisão de escalonamento os movimenta.
+Dentro do estágio operacional, os dois impactos ambientais são considerados são as emissões de carbono e 
+o consumo de água. Essa escolha é motivado pelo fato de que, para ambos impactos, existe um sinal de rede variável
+no tempo com uma resolução compatível com o ciclo de decisão de um escalonador em lote, na casa dos minutos ou horas. 
+Outros impactos ambientais, como resíduos materiais ou impactos sobre a biodiversidade, não dispoem de um sinal equivalente,
+e por isto, não são conciliáveis com o desenvolvimento de uma política de escalonamento que realiza decisões
+em tal granularidade horária.
+
+O termo "carbono" é usado a partir da definição utilizada pela Green Software Foundation, onde o termo
+é utilizado para se referir a todoo grupo de gases cuja emissões contribuem para o aquecimento global. Para
+calcular a quantidade de carbono emitido decorrente da operação de um sistema computacional, ou, resumidamente, 
+a pegada de carbono, é necessário multiplicar a energia elétrica consumida pela intensidade de carbono da 
+eletricidade. A intensidade de carbono da eletricidade é a quantidade de carbono emitida para gerar uma certa 
+quantidade de energia elétrica (geralmente um kWh), variando ao redor do ano e também pela região onde a 
+energia elétrica foi gerada. 
+
+
+\section{Simulação de RJMS}
+
+O constante aumento em complexidade e pura escala dos sistemas de HPC em produção acaba causando
+um aumento proporcional na dificuldade de estudar o funcionamento e de desenvolver modificações
+dos seus escalonadores. Não apenas é extremamente difícil apenas achar um sistema cujo operadores
+concordem em ceder inúmeras máquinas em produção para fins de estudos ou testes, como também
+esses próprios estudos não seriam abrangentes o suficiente, pensando em intervenções que mirem
+um sistema de forma completa, além dos possíveis custos financeiros para os pesquisadores
+e por fim a grande quantidade de energia empreendida para realizar tais testes. Uma outra alternativa
+seria a emulação dos experimentos por meio de máquinas virtuais e emuladores de rede. 
+Porém, a maioria dos experimentos em HPC abrangem cargas de trabalho de semanas, meses ou até mesmo anos,
+tornando proibitiva a emulação. A solução então se encontra no uso da simulação desses sistemas, onde
+os experimentos são executados através de abstrações dos recursos de sistemas HPC, do escalonador 
+e das aplicações em si.  
+
+Este trabalho utiliza do SimGrid, Batsim e Batsched para simular o escalonador de um sistema de HPC
+real. O SimGrid, que é um arcabouço para a simulação de aplicações e plataformas distribuídas, é usado na simulação
+dos recursos de um sistema de um HPC em si. Através de uma descrição declarativa dos nós de um sistema,
+incluindo sua quantidade, velocidade de processamento e potência em diferentes estados de energia, além das ligações
+de rede entre eles e a topologia do sistema, o SimGrid consegue converter a demanda computacional de uma
+tarefa no tempo simulado que ela consume. 
+
+O Batsim então se apoia no SimGrid para simular um RJMS, mas de uma maneira distinta quando comparada com 
+simuladores anteriores. No Batsim, a lógica de decisão de escalonamento não vive no simulador, mas sim fora,
+em um processo externo que dialoga com o Batsim através de um protocolo síncrono de requisição e resposta. 
+Os autores apresentam essa separação como o que permite conectar qualquer algoritmo ao simulador, escrito em
+qualquer linguagem, dado que para isso basta conseguir escrever no socket de mensagens. Para realizar a validação
+do Batsim quando comparado com um sistema real, os autores plugaram o Kamelot, escalonador real do sistema OAR,
+e o plugaram no Batsim sem necessidade de refatoração do código. Executando nove cargas sob um algoritmo de 
+backfilling, eles relataram diferenças entre a execução real e simulada da mesma ordem de grandeza que diferenças
+entre duas execuções reais da mesma carga, implicando uma correspondência de comportamento entre sistema real
+e simulador.
+
+O Batsched é um exemplo de aplicação que atua com a parte das decisões de escalonamento que o Batsim delega.
+Em seu código-fonte, temos a implementação de diversas critérios para ordenação da fila, como FCFS, SJF, LGF,
+além de políticas mais complexas como o EASY backfilling. 
