@@ -77,3 +77,61 @@ em contraste com versões mais conservadoras, que garantem que um certo número 
 ao job prioritário ou mesmo nenhum job da fila tenha sua execução delegada por conta do mecanismo
 de backfilling. No fim das contas, o EASY é o baseline consolidado, pensando tanto nos
 escalonadores dos sistemas reais quanto na literatura de políticas de escalonamento.
+
+O modelo de que um job roda até a sua finalização a partir do início da sua execução pode ser incrementado
+ao se levar em conta a possibilidade de preempção dos jobs. Políticas preemptivas tem a capacidade de
+interromper os jobs em execução, diferindo pelo quanto de trabalho já realizado pelo job preemptado
+sobrevive a essa interrupção. Na sua forma mais básica, um job é parado e todo o seu trabalho até o momento
+da interrupção é perdido, recomençando seu trabalho do zero ao ser reiniciado. Em uma forma intermediária,
+ao ser interrompido, um job tem a garantia que todos os nós envolvidos na sua execução estarão impossibilitados
+de serem atribuídos para outros jobs, permanecendo assim até o job ser resumido. Por fim, é possível que 
+a aplicação ou sistema operacional realize operações de salvamento do estado atual (checkpoints) frequentes
+durante a execução do job. Assim, caso o mesmo seja pausado, é possível retomá-lo a partir do estado salvo
+no último checkpoint. 
+
+A ampla adoção de mecanismos de checkpoints em sistemas de HPC traria variados benefícios,
+abrangindo desde recuperação de falhas quanto flexibilização das classes de jobs executados em sistema,
+otimizando o convívio entre jobs interativos e batch jobs. Porém, devido a complexidade estrutural de
+realizar esses checkpoints em grandes aplicações com alto grau de paralelismo, além do overhead decorrido
+nos processos, uma boa parte dos escalonadores em produção acaba não utilizando de tais mecanismos.
+
+A avaliação de diferentes estratégias de escalonamento é realizada através do uso das métricas de performance,
+ao reduzir um escalonamento composto de milhares de jobs e com alta complexidade algorítmica em um 
+número único e facilmente comparável. Pela ótica dos administradores de um sistema de HPC, a ênfase principal
+remete a quanto do sistema está sendo útil a cada momento. Assim, algumas das principais métricas 
+com esse foco são: \textit{taxa de utilização}, que mede qual é a porcentagem dos recursos utilizada em um 
+determinado período de tempo; \textit{vazão}, que mede quantos jobs foram processados durante um determinado 
+período de tempo; e \textit{makespan}, que relata o momento de finalização do ótimo job em uma determinada 
+carga de trabalho. 
+
+Já pela ótica dos usuários finais do sistema, a maior preocupação remete a saber quanto de tempo será
+necessário esperar para que o trabalho submetido seja finalizado e retorne para o mesmo. Assim, algumas 
+das métricas mais utilizadas são: \textit{tempo de espera médio}, que relata qual a média que um job 
+permanece em espera entre chegar na fila e de fato começar a ser executado; \textit{tempo de resposta médio}, 
+que relata qual a média de tempo de finalização os jobs, com o tempo de finalização sendo a soma do tempo
+de espera e tempo de execução do job. Essas métricas também podem ser ponderadas por características dos jobs,
+como seu comprimento, largura, entre outras.
+
+Uma das métricas mais importantes e utilizadas na área que estuda escalonamentos em HPC é o \textit{slowdown}.
+Essa é uma métrica sem dimensão que mede a razão de tempo de resposta de um job em relação ao tempo em que ele
+ficou executando no sistema, o seu tempo de \textit{runtime}. Porém, essa métrica pura acaba sendo muito sensível
+a jobs com tempo de execução muito curtos. Por exemplo, considere dois jobs, $j_{a}$ e $j_{b}$, com tempos
+de execução de $0.1 s$ e $30 s$, respectivamente. Caso os dois tenham esperado por 15 minutos na fila até
+comecerem a ser executados, eles terão slowdown de 9001 e 31, respectivamente. Notando essa demasada ênfase
+em jobs extremamente curtos, Feiteson et. al propôs o \textit{bounded slowdown}, limitando o tempo de execução
+desses jobs extremamente curtos a um limiar fixo, como 60 segundos, por exemplo. Esta dissertação adota a média
+de bounded slowdown entre todos os jobs de uma carga de trabalho como métrica primária de desempenho e, portanto,
+comparação entre os escalonamentos resultantes das heurísticas.
+
+Portanto, a cargo do escalonador estão o instante no tempo em que cada job começa a ser executado, os nós atribuídos
+a esse job, e no caso em que se considera o uso de mecanismos de preempção, quantas vezes esse job é interrompido
+e posteriomente resumido. Não cabe ao escalonador determinar o trabalho que o job precisa realizar, dado que o 
+trabalho é fixado pelo código da aplicação, seus dados de entrada e pelo número de nós que o usuário requisitou.
+Considerando jobs rígidos, esse número chega ao escalonador como uma exigência, não uma variável a ser otimizada.
+Tampouco cabe ao próprio determinar a potência que o job demanda ao executar, quando levado em conta o modelo desta
+dissertação que não considera mecanismos de alteração de potência por meio do escalonador como DVFS ou 
+\textit{power capping}. Assim, restam ao escalonador quando rodar e onde rodar, o que implica que as métricas
+de desemepnho apresentadas acima são todas funções que tem como parâmetros o instante de início e a duração
+da execução. O restante deste capítulo visa mostrar que a pegada ambiental de um job é uma função dessas mesmas
+duas quantidades, e que é através disso que o escalanador se posiciona como um objeto de interesse ambiental passível
+de intervenção. 
