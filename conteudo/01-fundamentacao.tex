@@ -228,6 +228,64 @@ portanto essa também a exterior ao controle do escalonador. O que ele tem o pod
 em que cada job se expõe a essas intensidades, sendo essa a única forma pela qual uma decisão de escalonamento
 interfere no volume das pegadas operacionais.
 
+\section{Da execução à pegada}
+
+Diversos relatos na literatura observaram que a maior parte do consumo de energia dentro de um nó computacional
+é predominantemente causada pelas operações das suas unidades de processamento. A velocidade de processamento é diretamente
+proporcional com a frequência do processador, que por sua vez é proporcional ao consumo de energia causado pelo mesmo. 
+Boa parte dos trabalhos tende a decompor a potência de um nó entre dois componentes, estática e dinâmica. 
+A componente estática diz respeito a potência consumida quando o nó está ligado e ocioso,  
+sem nenhum trabalho atribuído. Já a componente dinâmica diz respeito a potência consumida 
+quando o nó de fato está em execução, realizando algum trabalho computacional, e depende do grau de utilização 
+na CPU em determinado instante. Apesar de poder parecer contra-intuitivo, estudos relatam que a 
+potência ociosa pode representar uma boa parte da porcentagem em relação ao estado de potência em 
+execução em um momento que o processador está operando na sua frequência máxima. White et al., por exemplo,
+relatou medições em um cluster acadêmico de potência ociosa na casa dos 260W, em relação a potência 
+de 410 W com o nó sob utilização plena.
+
+O modelo adotado nesta dissertação realiza duas simplificações acerca disso. Primeiro, tratamos a frequência
+de operação como um parâmetro fixo da plataforma, dado que nenhum dos mecanismos considerados e desenvolvidos 
+a altera. Segundo, todos os jobs da aplicação compartilham o mesmo valor de potência em execução, 
+independetemente da aplicação que eles executam. Assim, essas duas simplificações acabam reduzindo a
+componente dinâmica em um valor constante, e a potência de um nó passa a poder ser descrita por apenas dois valores:
+potência em execução $P_{exec}$ e potência ociosa $P_{ocio}$. 
+
+A segunda simplificação é limitada pela literatura, visto que aplicações com perfis distintos de uso de memória,
+disco e de processamento desempenham potências distintas mesmo sob utilização idêntica. Ela é adota pelo fato de que
+os traços de carga de trabalho utilizados nesta dissertação registram informações como o número de nós requisitados
+e a duração máxima de cada job, mas não categorizam a natureza da aplicação executada, o que impede a atribuição
+de um esquema de potência por aplicação.
+
+Como a energia consumida em um intervalo de tempo é a integral da potência no tempo, do modelo acima obtém-se que
+um conjunto de $m$ nós mantidos em um mesmo estado de potência por um intervalo $\Delta t$ consome $m P \Delta t$.
+Disso decorre que um cronograma de execução produz dois tipos de energia, a dos nós que executam jobs e dos nós que
+permanecem ligados sem trabalho atribuído. Algumas intervenções na prática possibilitam o desligamento de nós
+ociosos a fim de economia de energia, mas este modelo não inclui a possibilidade desse mecanismo.
+
+As pegadas ambientais são obtidas através da multiplicação entre essa energia pelas intensidades apresentadas na Subseção 2.2.
+Como as intensidades vairam ao longo do do dia e das estações, acompanhando a composição da rede elétrica em cada instante,
+essa multiplicação não pode ser feita sobre valores agregados sem perda de informação. Portanto, a pegada de um job que
+executa entre os instantes $t$ e $t + d$, para uma intensidade ambiental $I_{e}$, é dada por
+
+\begin{equation}
+F_{e} = P_{exec} \int_{t}^{t + d} I_{e}(\tau)
+\end{equation}
+
+A pegada é uma grandeza acumulada, medida a partir de uma execução de carga de trabalho do escalonador, logo
+passando a existir apenas depois que a execução em si já tenha ocorrido. Em contrapartida, as intensidades $I_{C}$ e $I_{W}$
+são funções do tempo, determinadas pela matriz elétrica de uma região e externas ao escalonador, com sua existência
+independente de haver ou não jobs executando. Elas são externas ao escalonador, que tem a capacidade de 
+utilizá-las mas não de alterá-las.
+
+Como resultado, dois jobs idênticos, executados em instantes diferentes do mesmo dia, atravessam composições de rede
+elétrica diferentes e produzem pegadas diferentes. O instante de início, que a Seção 2.1 apresentou como uma
+das duas quantidades sob controle do escalonador, é consequentemente uma das quantidades que determinam o impacto
+ambiental de uma execução. Somando isso ao fechamento da mesma seção, obtém-se que o instante de início e a duração do job
+determinam simultaneamente o desempenho e a pegada ambiental. Desta maneira, uma única decisão de escalonamento
+move essas duas grandezas paralelamente, sendo que os movimentos podem ser em direções opostas. Essa 
+dependência compartilhar torna possível a formulação de compromisso entre desempenho e impacto ambiental, sendo 
+sobre ela que se apoiam as heurísticas apresentadas dos Capítulos 6 a 8.
+
 \section{Simulação de RJMS}
 
 O constante aumento em complexidade e pura escala dos sistemas de HPC em produção acaba causando
