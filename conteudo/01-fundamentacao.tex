@@ -15,7 +15,9 @@ Management System, ou RJMS), que pode ser resumido como o escalonador do sistema
 principal é decidir em que máquinas e em que momento um dado trabalho computacional deve ser executado. 
 Esses trabalhos, ou \emph{jobs}, nada mais são do que aplicações computacionais, como programas ou scripts,
 em conjunto com a quantidade de recursos requisitados, tempo de submissão, e outras informações pertinentes
-para a execução do mesmo.
+para a execução do mesmo. Sistemas em produção armazenam esse conjunto de informações para cada job submetido,
+gerando um histórico resultante chamado de \emph{traço de carga de trabalho}, que é utilizado como 
+insumo para que uma política de escalonamenteo seja avaliada sobre uma demanda real invés de sintética.
 
 Para realizar tal função, o escalonador deve então decidir o modo para como compartilhar seus recursos disponíveis
 entre os jobs requisitantes em um certo momento. Os dois esquemas principais de compartilhamento são o \emph{time-sharing},
@@ -49,6 +51,16 @@ forçada do job, é a solução utilizada na prática, inclusive com relatos ale
 acaba sendo benéfica de acordo com a política de escalonamento utilizada. Esse tempo máximo declarado faz parte
 do modelo de job "rígido" dominante em sistemas de HPC em produção e utilizado por esse trabalho, 
 onde os jobs são executados por máquinas em esquema de space-sharing e com largura rígida.  
+
+O escalonamento em lote se caracteriza como um problema de decisão online. A cada instante, o escalonador
+realiza as suas decisões de escalonamento com base no conjunto de jobs presentes no sistema naquele momento, 
+sem conhecimento acerca das submissões futuras. Uma vez que o job tenha o início da sua execução delegado,
+ele permanece em execução até a sua finalização, exceto nos casos em que se consideram mecanismos de preempção.
+Um escalonador clarividente é uma construção teórica, dispondo do traço completo da carga de trabalho antes de tomar
+cada uma das suas decisões, e portanto, não é passível de implementação prática em um sistema em produção. 
+Ainda assim, ele se mostra uma construção útil para a avaliação de políticas de escalonamento, funcionando 
+como um limiar superior de desempenho. É dessa construção que o Capítulo 5 se apoia para calcular os 
+referenciais de teto.
 
 A grande maioria dos escalonadores em produção seguem uma lógica de enfileiramento, atribuindo recursos
 disponíveis em determinado momento para jobs que estão esperando em uma fila, de acordo com a própria 
@@ -130,11 +142,16 @@ trabalho é fixado pelo código da aplicação, seus dados de entrada e pelo nú
 Considerando jobs rígidos, esse número chega ao escalonador como uma exigência, não uma variável a ser otimizada.
 Tampouco cabe ao próprio determinar a potência que o job demanda ao executar, quando levado em conta o modelo desta
 dissertação que não considera mecanismos de alteração de potência por meio do escalonador como DVFS ou 
-\textit{power capping}. Assim, restam ao escalonador quando rodar e onde rodar, o que implica que as métricas
-de desempenho apresentadas acima são todas funções que tem como parâmetros o instante de início e a duração
-da execução. O restante deste capítulo visa mostrar que a pegada ambiental de um job é uma função dessas mesmas
-duas quantidades, e que é através disso que o escalonador se posiciona como um objeto de interesse ambiental passível
-de intervenção. 
+\textit{power capping}. 
+
+Assim, restam ao escalonador quando rodar e onde rodar. Como a duração da execução de um job é resultante do trabalho
+descrito pela própria aplicação e pelo número de nós requisitados pelo usuário, o escalonador não tem controle sobre a mesma.
+Com a duração fixada e considerando a execução contínua do job, deriva-se que todas as métricas de desempenho 
+apresentadas acima são funções que tem como parâmetro uma única quantidade sob controle do escalonador,
+o instante de início da execução (o tempo de espera é nada mais que a diferença entre o instante de início 
+e o instante de submissão do job). O restante deste capítulo visa mostrar que a pegada ambiental 
+de um job é uma função dessa mesma quantidade singular, e que por essa via que o escalonador se
+posiciona como objeto de interesse ambiental passível de intervenção.
 
 \section{Pegadas ambientais em computação}
 
@@ -160,6 +177,17 @@ computacionais e da água utilizada nos sistemas de resfriamento; e o estágio d
 as atividades relacionadas ao tratamente dos recursos de hardware que não tem mais serviço para o sistema, 
 como descarte, reciclagem dos materiais ou reuso. Seus impactos vêm dos fluxos de resíduos e materiais residuais
 que permanecem após que o hardware deixa de ser útil para aquele sistema.
+
+É a partir dessas atividades que se define a distinção que organiza a contabilidade ambiental adotada
+neste trabalho. Define-se como pegada incorporada a parcela de impacto ambiental associada à 
+extração dos materiais, à manufatura e transporte dos equipamentos de hardware, à construção da
+instalação em si e ao descarte dos seus equipamentos. Essa pegada é contraída antes ou depois do
+período de operação de fato do sistema, sendo geralmente amortizada ao longo da vida útil do sistema.
+Já a pegada operacional é a parcela associada ao consumo de energia elétrica e água para alimentar os
+equipamentos de TI e os sistemas de resfriamento da instalação durante sua operação. Enquanto a pegada
+operacional depende de quanta e quando energia e água são consumidor, a pegada incorporada é determinada
+por escolhas de projeto e construção da instalação. Portanto, o escalonador de um sistema de HPC 
+não dispõe de nenhuma alavanca para alterar sobre a pegada incorporada.
 
 Esta dissertação intervém exclusivamente no estágio operacional de um sistema de HPC, porque esse é o único
 em que mudanças no escalonador são capazes de inferir mudanças nos impactos ambientais gerados. Sob o modelo adotado,
@@ -275,7 +303,7 @@ A pegada é uma grandeza acumulada, medida a partir de uma execução de carga d
 passando a existir apenas depois que a execução em si já tenha ocorrido. Em contrapartida, as intensidades $I_{C}$ e $I_{W}$
 são funções do tempo, determinadas pela matriz elétrica de uma região e externas ao escalonador, com sua existência
 independente de haver ou não jobs executando. Elas são externas ao escalonador, que tem a capacidade de 
-utilizá-las mas não de alterá-las.
+utilizá-las mas não de alterá-las. 
 
 Como resultado, dois jobs idênticos, executados em instantes diferentes do mesmo dia, atravessam composições de rede
 elétrica diferentes e produzem pegadas diferentes. O instante de início, que a Seção 2.1 apresentou como uma
@@ -285,6 +313,15 @@ determinam simultaneamente o desempenho e a pegada ambiental. Desta maneira, uma
 move essas duas grandezas paralelamente, sendo que os movimentos podem ser em direções opostas. Essa 
 dependência compartilhada torna possível a formulação de compromisso entre desempenho e impacto ambiental, sendo 
 sobre ela que se apoiam as heurísticas apresentadas dos Capítulos 6 a 8.
+
+A presença de preempção altera esse cenário em dois aspectos. Primeiro, um job que é interrompido 
+e posteriormente retomado deixa de ocupar apenas uma janela de tempo contígua, passando a atravessar
+várias janelas, de modo que a sua pegada ativa não é mais calculada pela Equação 2.1, 
+mas sim pela soma das parcelas correspondentes à cada janela. Segundo, o trabalho realizado entre o último
+estado salvo e a interrupção necessita ser refeito, com essa reexcução acrescentando uma parcela de
+energia ativa ao total. Em troca, é possível utilizar os nós liberados durante a interrupção de um 
+certo job para executar outros jobs, podendo converter energia ociosa em energia ativa em casos de
+demanda na fila. O Capítulo 8 trata dessa terceira alavanca e dos custos que ela introduz.
 
 \section{Simulação de RJMS}
 
@@ -322,3 +359,12 @@ e simulador.
 O Batsched é um exemplo de aplicação que atua com a parte das decisões de escalonamento que o Batsim delega.
 Em seu código-fonte, temos a implementação de diversos critérios para ordenação da fila, como FCFS, SJF, LGF,
 além de políticas mais complexas como o EASY backfilling. 
+
+Deste conjunto de ferramentas, este trabalho utiliza sem nenhuma modificação a descrição declarativa
+da plataforma e a conversão de demanda computacional em tempo simulado, o protocolo de decisão externo,
+a contabilização de energia a partir dos estados de potência dos nós, e as implementaçãoes dos critérios
+de ordenação de fila e do EASY backfilling, sendo esse adotado como baseline exatamente na forma
+em que é distribuído. Porém, três recursos necessários para este trabalho não existem nessa infraestrutura:
+o consumo de sinais ambientais externos ao longo do tempo simulado, a contabilização das pegadas de carbono
+e hídrica por job, instante a instante, e o suporte a preempção com o custo de reexecução modelado.
+O Capítulo 5 tem como objetivo construir essas três extensões. 
