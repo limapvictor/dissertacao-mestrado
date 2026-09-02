@@ -11,13 +11,13 @@ por inúmeras unidades de processamento, sejam CPUs ou GPUs, além dos dispositi
 e dispositivos de rede necessários para habilitar e suportar o enorme volume de computações simultâneas
 nesses nós. Advinda dessa complexidade, os usuários finais desses sistemas enviam os seus trabalhos para
 um software intermediário, o Sistema de Gerenciamento de Trabalhos e Recursos (do inglês Resource and Job
-Management System, ou RJMS), que pode ser resumido como o escalanador do sistema, observado que sua função
+Management System, ou RJMS), que pode ser resumido como o escalonador do sistema, observado que sua função
 principal é decidir em que máquinas e em que momento um dado trabalho computacional deve ser executado. 
 Esses trabalhos, ou \emph{jobs}, nada mais são do que aplicações computacionais, como programas ou scripts,
 em conjunto com a quantidade de recursos requisitados, tempo de submissão, e outras informações pertinentes
 para a execução do mesmo.
 
-Para realizar tal função, o escalanador deve então decidir o modo para como compartilhar seus recursos disponíveis
+Para realizar tal função, o escalonador deve então decidir o modo para como compartilhar seus recursos disponíveis
 entre os jobs requisitantes em um certo momento. Os dois esquemas principais de compartilhamento são o \emph{time-sharing},
 onde um mesmo recurso é compartilhado entre diversos jobs, e com esses tendo a posse dos recursos por 
 pequenas fatias de tempo; e o \emph{space-sharing}, onde um recurso é atribuído exclusivamente a um job até a finalização do mesmo. 
@@ -28,7 +28,7 @@ interação com o usuário durante sua execução (interativos) são preferível
 processadores em um esquema de time-sharing, enquanto para jobs que rodam sem a necessidade de interação com 
 o usuário (batch) se opta por um esquema de space-sharing.
 
-Jobs são caracterizados em relação a duas dimensões espaciais: o seu comprimento, que diz respeito
+Jobs são caracterizados em relação a duas dimensões: o seu comprimento, que diz respeito
 ao tempo de execução decorrido de um job; e sua largura, que caracteriza um job a partir da quantidade
 de recursos requisitados por tal. Sobre a largura, é possível classificar um job em uma de quatro
 categorias: \textbf{rígidos}, onde o número de recursos que o escalonador atribui a um job é exatamente
@@ -42,7 +42,7 @@ possíveis incorporações ou liberações de recursos.
 A capacidade de estimar o comprimento de um job é de grande importância para a maioria das políticas 
 de escalonamento. Apesar de alguns trabalhos na área apresentarem soluções quanto a estimação automática
 do tempo de execução dos jobs por parte do próprio escalonador, na prática a maioria dos sistemas acaba
-demandando que os usuários submitam o tempo de execução que eles esperam que o job tome, nesse caso 
+demandando que os usuários submetam o tempo de execução que eles esperam que o job tome, nesse caso 
 funcionando como um tempo de execução máximo, ou \textit{walltime}. Apesar dos usuários possuírem a tendência
 de superestimar esse tempo de execução máximo, visto que a subestimação do walltime levaria a finalização
 forçada do job, é a solução utilizada na prática, inclusive com relatos alegando que essa superestimação
@@ -56,11 +56,11 @@ ordenação dessa fila. Diversos critérios de ordenação da fila são utilizad
 de chegada na fila, pelo tempo de execução máxima do job, seja crescente ou decrescente, pelo número de
 recursos requisitados. O critério do tempo de chegada do job na fila (ou \textit{First-Come-First-Serve}, 
 FCFS) é um dos mais utilizados na prática, dada a simplicidade da sua implementação e explicabilidade. 
-Entretanto, esse critério aplicado sozinha corre o risco de causar a chamada fragmentação na máquina, 
+Entretanto, esse critério aplicado sozinho corre o risco de causar a chamada fragmentação na máquina, 
 com uma parte considerável dos nós do sistema tornando-se ociosos enquanto o job na posição mais 
 prioritária da fila, a cabeça, espera pela liberação dos recursos necessários para sua execução.
 
-Desenvolvidor para integrar o escalonador EASY (de Extensible Argonne Scheduling sYstem), gerenciador 
+Desenvolvido para integrar o escalonador EASY (de Extensible Argonne Scheduling sYstem), gerenciador 
 do IBM SP no Laborátório Nacional de Argonne, o \emph{backfilling} é um mecanismo que visa lidar com os
 nós ociosos do sistema devidos a bloqueio pela cabeça da fila, sendo altamente implementado nos 
 sistemas em produção. A partir do momento em que o job na cabeça da fila não consegue ser executado
@@ -101,7 +101,7 @@ número único e facilmente comparável. Pela ótica dos administradores de um s
 remete a quanto do sistema está sendo útil a cada momento. Assim, algumas das principais métricas 
 com esse foco são: \textit{taxa de utilização}, que mede qual é a porcentagem dos recursos utilizada em um 
 determinado período de tempo; \textit{vazão}, que mede quantos jobs foram processados durante um determinado 
-período de tempo; e \textit{makespan}, que relata o momento de finalização do ótimo job em uma determinada 
+período de tempo; e \textit{makespan}, que relata o momento de finalização do último job em uma determinada 
 carga de trabalho. 
 
 Já pela ótica dos usuários finais do sistema, a maior preocupação remete a saber quanto de tempo será
@@ -117,23 +117,23 @@ Essa é uma métrica sem dimensão que mede a razão de tempo de resposta de um 
 ficou executando no sistema, o seu tempo de \textit{runtime}. Porém, essa métrica pura acaba sendo muito sensível
 a jobs com tempo de execução muito curtos. Por exemplo, considere dois jobs, $j_{a}$ e $j_{b}$, com tempos
 de execução de $0.1 s$ e $30 s$, respectivamente. Caso os dois tenham esperado por 15 minutos na fila até
-comecerem a ser executados, eles terão slowdown de 9001 e 31, respectivamente. Notando essa demasada ênfase
-em jobs extremamente curtos, Feiteson et. al propôs o \textit{bounded slowdown}, limitando o tempo de execução
+começarem a ser executados, eles terão slowdown de 9001 e 31, respectivamente. Notando essa demasiada ênfase
+em jobs extremamente curtos, Feiteson et al. propôs o \textit{bounded slowdown}, limitando o tempo de execução
 desses jobs extremamente curtos a um limiar fixo, como 60 segundos, por exemplo. Esta dissertação adota a média
 de bounded slowdown entre todos os jobs de uma carga de trabalho como métrica primária de desempenho e, portanto,
 comparação entre os escalonamentos resultantes das heurísticas.
 
 Portanto, a cargo do escalonador estão o instante no tempo em que cada job começa a ser executado, os nós atribuídos
 a esse job, e no caso em que se considera o uso de mecanismos de preempção, quantas vezes esse job é interrompido
-e posteriomente resumido. Não cabe ao escalonador determinar o trabalho que o job precisa realizar, dado que o 
+e posteriormente resumido. Não cabe ao escalonador determinar o trabalho que o job precisa realizar, dado que o 
 trabalho é fixado pelo código da aplicação, seus dados de entrada e pelo número de nós que o usuário requisitou.
 Considerando jobs rígidos, esse número chega ao escalonador como uma exigência, não uma variável a ser otimizada.
 Tampouco cabe ao próprio determinar a potência que o job demanda ao executar, quando levado em conta o modelo desta
 dissertação que não considera mecanismos de alteração de potência por meio do escalonador como DVFS ou 
 \textit{power capping}. Assim, restam ao escalonador quando rodar e onde rodar, o que implica que as métricas
-de desemepnho apresentadas acima são todas funções que tem como parâmetros o instante de início e a duração
+de desempenho apresentadas acima são todas funções que tem como parâmetros o instante de início e a duração
 da execução. O restante deste capítulo visa mostrar que a pegada ambiental de um job é uma função dessas mesmas
-duas quantidades, e que é através disso que o escalanador se posiciona como um objeto de interesse ambiental passível
+duas quantidades, e que é através disso que o escalonador se posiciona como um objeto de interesse ambiental passível
 de intervenção. 
 
 \section{Pegadas ambientais em computação}
@@ -246,12 +246,12 @@ de 410 W com o nó sob utilização plena.
 O modelo adotado nesta dissertação realiza duas simplificações acerca disso. Primeiro, tratamos a frequência
 de operação como um parâmetro fixo da plataforma, dado que nenhum dos mecanismos considerados e desenvolvidos 
 a altera. Segundo, todos os jobs da aplicação compartilham o mesmo valor de potência em execução, 
-independetemente da aplicação que eles executam. Assim, essas duas simplificações acabam reduzindo a
+independentemente da aplicação que eles executam. Assim, essas duas simplificações acabam reduzindo a
 componente dinâmica em um valor constante, e a potência de um nó passa a poder ser descrita por apenas dois valores:
 potência em execução $P_{exec}$ e potência ociosa $P_{ocio}$. 
 
 A segunda simplificação é limitada pela literatura, visto que aplicações com perfis distintos de uso de memória,
-disco e de processamento desempenham potências distintas mesmo sob utilização idêntica. Ela é adota pelo fato de que
+disco e de processamento desempenham potências distintas mesmo sob utilização idêntica. Ela é adotada pelo fato de que
 os traços de carga de trabalho utilizados nesta dissertação registram informações como o número de nós requisitados
 e a duração máxima de cada job, mas não categorizam a natureza da aplicação executada, o que impede a atribuição
 de um esquema de potência por aplicação.
@@ -262,8 +262,8 @@ Disso decorre que um cronograma de execução produz dois tipos de energia, a do
 permanecem ligados sem trabalho atribuído. Algumas intervenções na prática possibilitam o desligamento de nós
 ociosos a fim de economia de energia, mas este modelo não inclui a possibilidade desse mecanismo.
 
-As pegadas ambientais são obtidas através da multiplicação entre essa energia pelas intensidades apresentadas na Subseção 2.2.
-Como as intensidades vairam ao longo do do dia e das estações, acompanhando a composição da rede elétrica em cada instante,
+As pegadas ambientais são obtidas através da multiplicação entre essa energia pelas intensidades apresentadas na Seção 2.2.
+Como as intensidades variam ao longo do dia e das estações, acompanhando a composição da rede elétrica em cada instante,
 essa multiplicação não pode ser feita sobre valores agregados sem perda de informação. Portanto, a pegada de um job que
 executa entre os instantes $t$ e $t + d$, para uma intensidade ambiental $I_{e}$, é dada por
 
@@ -283,7 +283,7 @@ das duas quantidades sob controle do escalonador, é consequentemente uma das qu
 ambiental de uma execução. Somando isso ao fechamento da mesma seção, obtém-se que o instante de início e a duração do job
 determinam simultaneamente o desempenho e a pegada ambiental. Desta maneira, uma única decisão de escalonamento
 move essas duas grandezas paralelamente, sendo que os movimentos podem ser em direções opostas. Essa 
-dependência compartilhar torna possível a formulação de compromisso entre desempenho e impacto ambiental, sendo 
+dependência compartilhada torna possível a formulação de compromisso entre desempenho e impacto ambiental, sendo 
 sobre ela que se apoiam as heurísticas apresentadas dos Capítulos 6 a 8.
 
 \section{Simulação de RJMS}
@@ -320,5 +320,5 @@ entre duas execuções reais da mesma carga, implicando uma correspondência de 
 e simulador.
 
 O Batsched é um exemplo de aplicação que atua com a parte das decisões de escalonamento que o Batsim delega.
-Em seu código-fonte, temos a implementação de diversas critérios para ordenação da fila, como FCFS, SJF, LGF,
+Em seu código-fonte, temos a implementação de diversos critérios para ordenação da fila, como FCFS, SJF, LGF,
 além de políticas mais complexas como o EASY backfilling. 
