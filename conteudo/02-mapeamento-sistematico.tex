@@ -1,0 +1,196 @@
+%!TeX root=../tese.tex
+%("dica" para o editor de texto: este arquivo é parte de um documento maior)
+% para saber mais: https://tex.stackexchange.com/q/78101
+
+\chapter{Mapeamento Sistemático de impactos ambientais em HPC}
+
+\section{Protocolo e execução}
+
+Enquanto uma revisão sistemática de literatura (RSL) sintetiza evidências a partir da literatura 
+para responder a uma questão de pesquisa em específico, um mapeamento sistemático de literatura (MSL) tem como
+objetivo produzir uma visão geral e estruturada da pesquisa existente em uma área de interesse. Geralmente, 
+mapeamentos sistemáticos tem um escopo mais amplo, sobre uma área de pesquisa significativa, enquanto
+revisões sistemáticas tem um escopo mais estreito. Um MSL geralmente resulta no mapeamento e/ou contagem
+dos relatos existentes agrupoados em diferentes categorias, enquanto o resultado de uma RSL é 
+a síntese do que há de pertinente na literatura acerca daquele questão. O autor desta dissertação
+foi um dos coautores do artigo (Lucas), participando nas etapas de triagem e classficação dos relatos
+extraídos da literatura. O artigo apresenta um mapeamento sistemático de literatura sobre 
+impactos ambientais em HPC, e o presente capítulo é uma adaptação do mesmo.
+
+O MSL foi conduzido de acordo com a metodologia definida por Peterson et al., cobrindo as etapas
+de busca, triagem, seleção e classificação dos relatos extraídos da literatura. Os artefatos publicados
+tornam possível a reprodução parcial dessas etapas. 
+
+A estratégia de busca foi derivada a partir da lógica \emph{PICO} (\textit{Population, Intervation,
+Comparison and Outcome}). \textit{Population} ancora a busca nos sistemas de HPC, enquanto 
+\textit{Intervention} captura avaliação ambiental e sustentabilidade. \textit{Comparison} e 
+\textit{Outcome} não foram utilizados, pois não se encaixam na natureza de um mapeamento sistemático.
+A busca cobriu título, resumo e palavras-chave, e foi realizada em 3 bases de dados: IEEE Xplore,
+ACM Digital Library e Scopus. A busca foi realizada com resultados filtrados até 11 de Abril de 2026,
+retornando um total de 4812 registros. Após a combinação e remoção de duplicatas, 3788 registros 
+foram submetidos à triagem.
+
+Antes da etapa de triagem, se fixaram dois critérios de inclusão e três critérios de exclusão. 
+Aqui, o critério mais interessante é o segundo critério de exclusão, que exclui relatos que focam
+apenas na questão energética dos sistemas de HPC, sem conectar isso com impactos ambientais
+mais amplos. É essse critério que define a fronteira do campo mapeado e que separa o mapeamento
+apresentado do resto da literatura já consolidade sobre eficiência puramente energética em HPC.
+
+A triagem combinou três movimentos: primeiro, foi feita uma revisão manual de um subconjunto 
+de 365 registros, da qual 25 registros foram considerados para inclusão e então selecionados para o movimento seguinte. Segundo, foram
+aplicados passos de \textit{snowballing}, tanto para frente quanto para trás, a partir desses 25 registros. Essas
+etapas resultaram na triagem de 2256 registros, dos quais 5 foram retidos. Um terceiro movimento de triagem automatizada foi então
+aplicado, utilizando os 365 registros previamente selecionados e os 5 relatos provenientes do \textit{snowballing} como base de 
+referência para avalição da triagem automática.
+
+Nessa etapa automatizada, três modelos de linguagem de grande escala (\textit{Large-Language Models}, ou LLMs)
+atuaram como avaliadores independentes, onde cada modelo recebia o título, resumo e critérios de inclusão e exclusão,
+e devolvia a decisão de inclusão ou exclusão com o critério correspondente. Além disso, os modelos foram instruídos 
+a incluir os relatos em caso de insuficiência de informação, para não descartar candidatos que poderiam ser relevantes.
+Os três avaliadores automatizados incluíram todos os relatos presentes na base de referência, e o coeficiente de
+Kohen contra a mesma variou entre 0,329 a 0,456, o que indica uma concordância levemente moderada entre os avaliadores.
+
+As diferenças entre os avaliadores foram motivadas principalmente por falsos positivos, ou seja, relatos que 
+foram incluídos por um avaliador, mas que não atendiam aos critérios de inclusão. Para controlar a quantidade
+de falsos positivos, foi definido um critério de inclusão total, onde um relato só seria considerado para análise
+posterior caso todos os três avaliadores concordassem com a inclusão. Disso, 514 registros que haviam sido incluídos
+por um ou dois avaliadores foram excluídos de revisão humanda, ao passo que 307 registros receberam concordância
+de inclusão pelos três avaliadores e seguiram. Desses registros, 244 não pertenciam a base de referência e 
+foram revisados conjuntamente pelos dois revisores humanos, com o coeficiente de Kohen de 0,374, indicando uma
+concordância moderada entre tais revisores. Após discussões para resolver as divergências, 32 mais relatos foram 
+incluídos aos 30 advindos da base de referência, totalizando em 62 relatos. O esquema de classificação desenvolvido
+para o mapeamento foi construído a partir da extração das palavras-chave dos resumos e introduções desses 62 relatos,
+com as categorias emergindo a partir do agrupamento dessas palavras-chave e sendo posteriormente refinadas
+durante a extração. 
+
+\section{Esquema de classificação em quatro facetas}
+
+O processo de extração das palavras-chave ocorreu em várias rodadas, sendo que já no primeiro ciclo foram produzidas
+4 facetas que se mostraram consistentes e por isso mantidas pelo restante do processos. As quatro facetas são:
+impactos ambientais, estágios do ciclo de vida, locus no sistema, e alavancas de gestão e intervenção. Cada uma
+dessas facetas responde a pergunta de pesquisa sobre o relato, sendo elas, respectivamente: qual impacto ambiental
+o relato examina, quando no ciclo de vida do sistema de HPC o impacto ocrorre, em qual camada do sistema o relato age,
+e como o impacto é tratado ou mitigado pelo relato. 
+
+Três dessas quatro facetas carregam uma ordenção interna, ou seja, formam uma sequência de categorias
+ao longo de um eixo com direcionamento. O locus começa pela instalação e infraestruturas de energia,
+passa pelo hardware e termina no nível de software e cargas de trabalho. O ciclo de vida vai da produção 
+do sistema, passa pela operação do mesmo e termina no estágio de fim de vida. Por fim, as alavancas de gestão
+e intervenção progridem da medição para ação, e de mudança técnica para mudança a nível organizacional.
+
+A faceta dos impactos ambientais se divide em quatro categorias, sendo elas: emissões de carbono,
+materiais e resíduos, uso de água, e biodiversidade e ecossistemas. Como essa faceta é nominal,
+é possível posicioná-la como a faceta central do esquema de classificação, agrupando corpus em populações
+e comparando o comportamento de cada uma delas ao longo dos três eixos ordenados das outras facetas.
+
+Esta dissertação está localizada nas categorias de estágio operacional quanto a faceta de ciclo de vida,
+no categoria de software e cargas de trabalho quanto a faceta de locus, e na categoria de otimização 
+de carga e tempo de execução quanto a faceta de alavancas de gestão e intervenção.
+
+\section{Panorama da literatura}
+
+O corpus não apresenta uma distribuição proporcional de relatos quanto as categorias da faceta de
+impactos ambientais, com 54 dos 62 relatos (87,1\%) abordando emissões de carbono,
+12 relatos (19,4\%) abordando materiais e resíduos, 5 relatos (8,1\%) abordando uso de água, e
+apenas 1 relato (1,6\%) abordando biodiversidade e ecossistemas. A categoria de carbono não só é a mais representada, mas também é a que apresenta a maior parte dos relatos mais recentes, 
+passando de 13 relatos publicados entre 2011 e 2022, para 36 relatos publicados apenas entre 2023 e 2025.
+Complementando, a maioria desses relatos cobre apenas uma categoria de impacto ambiental, com 52 abordando exatamente um impacto, 10 abordando
+dois impactos e nenhum relato abordando três ou mais. Desses 10 relatos que cobrem dois impactos,
+9 deles combinam emissões de carbono com materiais e resíduos, enquanto apenas 1 combina emissões
+de carbono com o uso de água. 
+
+Esses pares de impactos ambientais que existem no corpus não são frutos de um processo sistemático para captura
+de impactos ambientais em HPC, mas sim da existência de conjuntos de dados onde eles coexistem. A avaliação dos 
+impactos ambientais de produtos pode ser realizada através da Análise de Ciclo de Vida (em inglês 
+\textit{Life Cycle Assessment}, ou LCA), que é uma metodologia padronizada pelas ISO 14040 e 14044.
+Esse método contabiliza os impactos ambientais de um produto ao longo de sua existência, passando da
+extração de matérias-primas, manufatura, transporte, uso e por fim, descarte. A ACV de manufatura de hardware
+com o objetivo de quantificar emissões de carbono acaba por capturar também impactos relacionados a materiais
+e resíduos, com essa coexistência dos impactos numa mesma fonte de dados sendo refletida nos 9 relatos em conjunto.
+Quanto ao relato que combina emissões de carbono com o uso de água, ele advém de um modelo de resfriamento, que 
+captura tanto o consumo de energia (indiretamente, as emissões de carbono) quanto o consumo direto de água para o funcionamento
+do sistema de resfriamento.
+
+O estágio operacional é o mais representado para cada uma das quatro categorias de impacto ambiental, 
+com abordagem em 52 dos 54 relatos sobre carbono, 10 dos relatos sobre materiais e resíduos, 5 dos 5 relatos 
+sobre uso de água, e o único relato sobre biodiversidade. O estágio de produção assume um papel secundário, 
+com 15 dos 54 relatos sobre carbono. Essa concentração, assim como no caso sobre a combinação de impactos ambientais,
+é reflexo da disponibilidade de dados. Telemetria de potência e traços dos jobs executados nos sistemas de HPC são 
+visto como necessários pelos operadores de sistemas, e portanto são produzidos continuamente a partir do momento
+que esses entram em produção. Ainda acerca disso, o aumento no número de estudos sobre o estágio de produção é observado,
+motivado pelo aumento do número de contabilizações de carbono incorporado. Uma ausência notável quanto a essa
+faceta é a falta de relatos sobre o par água-fim de vida. Estudos mostram o impacto que o descarte mal apropriado
+de componentes pode causar sobre reservatórios subterrâneos de água, mas nenhum estudo específico sobre
+HPC trata disso. Os dados necessários para tais estudos exigiriam uma sinergia com a ecologia industrial, algo
+algo ainda não explorado pela comunidade de HPC no que tange o uso de água.
+
+Quanto a faceta de locus, o carbono percorre e tem a maioria dos relatos em todas as categorias dessa faceta:
+são 38 relatos situados na camada da instalação, 14 na de hardware e 28 em software e cargas de trabalho. Materiais e resíduos naturalmente
+acabam por se concentrar na camada de hardware, com 10 dos 12 relatos situados nessa camada, porém ainda sim possuem 
+relatos em outras camadas. Em contraste, o uso de água é abordado apenas na camada da instalação, com todos os 5 relatos 
+associados ao resfriamento dos sistemas da instalação. O relato sobre biodiversidade e ecossistemas se encaixa simultaneamente
+na camada de hardware e na camada de software. Essas concentrações parecem acompanhar quem produz a pesquisa, 
+dado que os relatos sobre materiais permanecem na camada de hardware pois eles são alimentados pelos dados provenientes
+dos inventários de ciclos de vida de hardware, enquanto o uso de água permanece atrelado a camada de instalação pois
+o trabalho origina-se majoritariamente da engenharia de resfriamento.
+
+A mesma prevalência do carbono é observada para a faceta das alavancas de gestão e intervenção, com 28 relatos em medição e contabilidade,
+21 em otimização de carga e tempo de execução, 17 em projeto de infraestrutura e 19 em incentivos e política. Materiais também engajam
+nas quatro categorias, dado que estudos de ciclo de vida de hardware geram dados que fluem naturalmente da medição
+para possíveis intervenções nas próprias políticas de aquisição de hardware dos centros de HPC. O uso de água engaja duas categorias,
+medição em 2 relatos e projetos de infraestrutura em 4 relatos, enquanto o único relato sobre biodiversidade e ecossistemas se encaixa na categoria de incentivos e política.
+engaja apenas medição.  
+
+Analisados em conjunto, os três paraeamentos entre impacto ambiental e respectivas facetas descreve um corpus mais
+aprofundado ao longo de um corredor único: carbono, estágio operacional, camada da instalação e medição e contabilidade.
+Fora dele, principalmente olhando para além das emissões de carbono, cada categoria de impacto ambiental se concentra
+de uma forma diferente. Materiais e resíduos se concentram notadamente na camada de hardware, mas conseguem passar por todas
+as categorias operacionais e de alavancas, inclusive tendo mais alcance sobre o estágio de fim de vida. Equanto isso,
+os relatos sobre uso de água ficam restritos a trabalhos sobre o resfriamento da instalação, sem chegar a hardware ou software.
+
+Os impactos ambientais menos estudados, seja o uso de água ou a biodiversidade, demonstram carecer de instrumentação
+comparável entre níveis. Não existem métricas quanto ao consumo de água por um job ou por um nó que corresponda
+à telemetria de potência por nó, nem um sinal de rede em tempo real para o uso de água, tão menos um sensoriamento
+de biodiversidade em nível de instalação. 
+
+Um escalonamento consciente de água exigiria sinais de consumo hídrico em uma granularidade compatível com os ciclos
+de decisão de um escalonador, em uma faixa infra-horária, e é justamente esse canal de dados que não existe. Essa
+é a causa principal quanto a lacuna de relatos sobre o uso de água na camada de software e também sobre o uso de água
+para alavancas de otimização de carga. A própria medição do consumo de água é tratad como emergente, dado que
+o primeiro enquadramento que a trata como pegada de primeira classe em HPC é de 2025. Como referência, relatos sobre carbono
+passaram da simples observação para a ação ao redor de uma década, a partir da infraestrutura de sinais de rede
+que se tornou disponível no início da década passada. A biodiversidade, por sua vez, enfrenta um desafio ainda maior no momento, visto que há um único ponto de partida de  medição, e
+intervenções de otimização ou de governança não podem ser realizadas sem que hajam métricas para quais agir.
+
+É possível inferir portanto que os pontos cegos da leitura são reflexos da fronteira da instrumentação disponível,
+não da pegada ambiental de HPC por si. Todos os pares que nenhum relato alcança não correspondem a perguntas 
+sem nenhum interesse científico, mas sim a lacuna de dados que a comunidade ainda não construiu.
+
+\section{Limitações do mapeamento}
+
+As limitações do MSL apresentado neste capítulo são organizadas em quatro classes, de acordo com as definições
+propostas por Wohlin et al. A primeira limitação é a de construção, que avalia se o mapeamento foi capaz de encontrar
+e capturar todos os relatos relevantes sobre impactos ambientiais em HPC. Como a consulta foi aplicada sobre título,
+resumo e palavras-chave, se assume que autores de trabalho ambiental expõem esse enquadramento de forma 
+explícita nos metadados indexados. Além disso, o esquema de classificação de quatro facetas, que foi construído
+de forma indutiva a partir do processo de extração de palavras-chave, é uma projeção defensável mas não a 
+única possível de se obter. A segunda limitação é de caráter interno, que avalia a confiabilidade do processo de triagem.
+A partir dos coeficientesde Kohen obtidos, tanto entre os avaliadores automatizados quanto entre os revisores humanos,
+se assume que a fronteira do corpus foi aproximadamente definida, não de forma exata. A regra dos três votos
+deixou 514 registros fora de revisão humana, e o snowballing exluiu 2256 registros apenas a partir do seu título e
+resumo, o que favorece relatos cuja faceta de impacto ambiental é mais explícita. A terceira limitação é de caráter
+externo, que avalia a capacidade de generalização do mapeamento para além do corpus analisado. Não foram consultadas
+Web of Science, DBLP e nem servidores de preprints, o que pode ter deixado de fora relato relevantes. Além disso,
+as consultas foram feitas exclusivamente em inglês. Por fim, a quarta limitação é de conclusão, que avalia a
+validade das inferências feitas a partir do mapeamento. As contagens são descritivas, sem teste de significância
+estatística, e o número enxuto de 62 relatos não sustenta inferência estatística entre os pares de facetas.
+
+Uma limitação importante a ser destacada é de conclusão aplicada aos pares de facetas que não possuem relatos,
+como o par de facetas água-software. A ausência de relatos pode indicar tanto uma ausência genuína na literatura,
+quanto um problema nas etapas de pesquisa ou extração de palavras-chave. É possível assumir duas premissas que
+indicam que a ausência de relatos é genuína, sendo elas: primeiro, um viés na inclusão explicaria quantos relatos
+entrariam no corpus, mas não justificaria por que todos que entraram se concentram em um único par de facetas,
+como no caso do par água-instalação; segundo, o viés de metadados falha justamente onde não interessa, visto que
+um trabalho de escalonamento consciente de água anunciaria água seja no título, resumo ou palavras-chave.
+
+\section{Implicações}
