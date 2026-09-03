@@ -194,3 +194,40 @@ como no caso do par água-instalação; segundo, o viés de metadados falha just
 um trabalho de escalonamento consciente de água anunciaria água seja no título, resumo ou palavras-chave.
 
 \section{Implicações}
+
+Como mencionado anteriormente, dos 62 relatos que compõe o corpus, apenas 5 deles abordam o impacto do uso de água
+causado por centros de HPC, sendo que todos esses se concentram na camada de instalação. Nenhum dos relatos está
+situado na camada de software, e nenhum recorre à alavanca de otimização de carga e tempo de execução, cenário que 
+contrasta com a situação do carbono, que reúne 28 e 21 relatos respectivamente. Esta dissertação se insere nessa
+célula de conchecimento vazio, propondo uma intervenção na camada de software, através da alavanca de otimização
+de tempo de execução, atuando sobre o impacto ambiental do uso de água. 
+
+O MSL realizado não apenas localiza a existência dessa célula de conhecimento vazia, mas também fornece uma visão
+de por que ela existe. Esse vácuo é reflexo da ausência de instrumentação que permita a medição do uso de água 
+em granularida compatível com os ciclos de decisão de um escalonador. A partir disso, é possível inferir 
+a form de contribuição, visto que antes de qualquer intervenção, é necessário construir a instrumentação 
+que as torna avaliáveis. Por isso este texto apresenta em primeiro lugar o modelo de pegada e ambiente de testes,
+e em seguida as heurísticas que intervém a partir dessa instrumentação construída. 
+
+Como apenas um dos relatos de todo o corpus pareia carbono com água, contabilizar e intervir as duas pegadas simultaneamente
+e com preocupações separadas se mostra mais do que um refinamento incremental, mas sim uma necessidade da área. O corpus demonstrou
+a combinação de dois impactos ambientais em alguns relatos, a partir da lógica de coexistência dos dados. A partir dessa mesma
+lógica, é possivel obter as intensidades de carbono e de água a partir da composição instantânea da rede elétrica
+em conjunto com os fatores de emissão de carbono e de consumo hídrico das diferentes tecnologias de geração de energia
+elétrica.  Por fim, a justificativa quanto a reportar as pegadas de carbono e de água separadamente segue a mesma 
+lógica do relato que combina os dois impactos. Vários sistemas de resfriamento visam reduzir suas emissões de carbono,
+e fazem isso através da redução do consumo de energia elétrica. Porém, para alcançar essa redução, boa parte desses sistemas
+acaba necessitando de um volume considerativo de água. Coincidentemente, as intensidades de carbono e de água da rede
+elétrica podem variar em direções opostas, de forma que essa discordância é um achado importante para a comunidade,
+não apenas um ruído de medição.
+
+O mapeamento sugere que ganhos de eficiência energética, por si só, são repetidamente absorvidos pelo próprio
+crescimento initerrupto das demandas computacionais, o que sugere que a eficiência energética isolada não é suficiente
+para se alcançar um crescimento sustentável. Apesar desta dissertação se situar como uma intervenção de eficiência,
+a pergunta primária é sobre demarcação, quanto existe de espaço para economizar, e que fração desse espaço
+é alcançável através de políticas simples. Além disso, ao estabelecer que a energia ativa é invariante ao escalonamento
+sob premissas declaradas, um limite é estabelecido, cujo limite serve igualmente a quem pretende utilizar a
+alavanca de otimização de carga e também a quem pretende demonstrar que ela é insuficiente. Por fim, a contribuição
+da instrumentação preenche a célula de medição de uso de água na camada de software e cargas de trabalho.
+Consequentemente, o produto deste capítulo não é apenas a constatação de uma lacuna, mas sim o entendimento do que
+causa essa lacuna, entendido aqui como a ausência de instrumentação, e a proposição de que tal instrumentação é construível.
