@@ -1,0 +1,129 @@
+%!TeX root=../tese.tex
+%("dica" para o editor de texto: este arquivo é parte de um documento maior)
+% para saber mais: https://tex.stackexchange.com/q/78101
+
+% Vamos definir alguns comandos auxiliares para facilitar.
+
+% "textbackslash" é muito comprido.
+\newcommand{\sla}{\textbackslash}
+
+% Vamos escrever comandos (como "make" ou "itemize") com formatação especial.
+\newcommand{\cmd}[1]{\textsf{#1}}
+
+% Idem para packages; aqui estamos usando a mesma formatação de \cmd,
+% mas poderíamos escolher outra.
+\newcommand{\pkg}[1]{\textsf{#1}}
+
+% A maioria dos comandos LaTeX começa com "\"; vamos criar um
+% comando que já coloca essa barra e formata com "\cmd".
+\newcommand{\ltxcmd}[1]{\cmd{\sla{}#1}}
+
+\chapter{Instrumento e ambiente experimental}
+\label{chap:modelo}
+
+\section{Modelo de pegada por host}
+\label{sec:modelo-pegada-host}
+
+O modelo adotado neste trabalho atribui a cada host do SimGrid um estado
+de pegada ambiental. O host do simgrid possui um estado de potência de 
+processamento a cada instante da simulação, com um job sendo ligado ao host a partir da 
+alocação do escalonamento. Essa escolha é justificada pelo fato de que a atribuição
+do estado de pegada ambiental a cada job acabaria deixando a parcela de
+energia consumida pelo nós ligados mas não alocados a nenhum job sem portador. 
+Essa parcela é relevante, visto que a energia consumido por um host ocioso
+é justamente uma das quantidades que o escalonador tem controle sobre. Considerando
+um modelo de job rígido, com alocação exclusiva, a pegada ambiental de um job
+pode ser recuperada através da diferença entre os valores acumulados 
+nos instantes de inicio e fim de todos os seus hosts alocados.
+
+A contabilidade elementar realizada pelo modelo converte potência em energia, e posteriormente
+energia em pegada ambiental. Considerando um intervalo de tempo $\Delta t$ segundos, um host em um estado de potência
+consumindo $P$ watts consume uma energia de TI de $E = \frac{P \times \Delta t}{3,6 \times 10^6}$, expressa em kWh.
+A partir da contabilização da energia consumida, o modelo acumula a pegada ambiental em três
+acumuladores operacionais distintos, um para a pegada de carbono, outro para 
+a pegada hídrica no sítio e outro para a pegada hídrica fora do sítio. Além disso, 
+dois valores estáticos armazenam as pegadas incorporadas, tanto para carbono quanto para água.
+As pegadas operacionais são calculadas, respectivamente, pelas equações: 
+    \begin{equation}
+        \label{carbon_footprint}
+        F^{C}_{op} \leftarrow F^{C}_{op} + E \times PUE \times I_{C}
+    \end{equation}
+
+    \begin{equation}
+        \label{water_onsite_footprint}
+        F^{W}_{on} \leftarrow F^{W}_{on} + E \times WUE
+    \end{equation}
+
+    \begin{equation}
+        \label{water_offsite_footprint}
+        F^{W}_{off} \leftarrow F^{W}_{off} + E \times PUE \times I_{W}
+    \end{equation}
+
+As três parcelas não compartilham o mesmo multiplicador devido a definição das 
+métricas envolvidas. Tanto as emissões de carbono quanto o consumo de água
+fora do sítio são dependentes do consumo total de energia da instalação, que é
+obtido justamente ao multiplicar a energia de TI consumida pelo PUE. Por outro lado,
+o consumo de água no sítio é dependente tão somente da energia de TI consumida,
+posteriormente multiplicado pelo WUE, e apenas por ele. Assim, manter as três parcelas
+separadas preserva a distinção entre consumo direto e indireto, além de permitir que
+cada uma seja contabilizada ou desativada de forma independente. 
+
+A atualização do estado de um host no modelo é feita 
+A acumulação das pegadas operacionais é feita instante a instante pelo modelo, motivado
+pelo fato de que as intensidades ambientais, tanto de carbono quanto de água, variam ao 
+longo do tempo em que um job é executado. Por exemplo, ao se considerar um traço com intensidade
+variando em janelas de 15 minutos, um job com execução de 6 horas atravessaria 24 janelas de 
+intensidades diferentes. Com isso, caso a pegada ambiental fosse calculada a partir da energia
+total consumida pelo job e da intensidade média do traço, o resultado seria uma aproximação
+grosseira da pegada ambiental real do job, descartando justamente a informação sobre a qual
+um política de escalonamente atua sobre. A acumulação instante a instante torna possível
+a comparação de políticas de escalonamentos alternativas em relação a pegada ambiental, 
+não apenas em relação a energia consumida.
+
+As equações acima contém quatro parâmetros operacionais que são configuráveis por
+host do SimGrid. Esses parâmetros são: o PUE, que não tem dimensão; 
+a intensidade de carbono $I_{C}$, que é medida em $kgCO_{2}eq/kWh$; a intensidade hídrica $I_{W}$, que é medida em $L/kWh$; 
+e o WUE, que é medido em $L/kWh$. Como a configuração desses parêmtros é feita por host, e não
+por plataforma ou simulação, é possível que hosts de zonas distintas recebam sinais de matrizes
+elétricas distintas, ou que hosts de uma mesma zona recebam fatores de instalação distintos. Assim,
+o modelo permite a substituição da rede elétrica, sítio ou conjunto de fatores de intensidade via
+troca de parâmetros, sem alterar o modelo. Além disso, esses parâmetros podem ser alterados
+ao longo da execução da simulação através de métodos de atribuição. Por fim, os valores 
+estáticos das pegadas incorporadas também são configuráveis por host.
+
+O Batsim é o responsável por realizar a ligação entre o modelo de pegada ambiental
+por host e a execução dos jobs. Nessa ligação se realizam as duas primeiras extensões
+anunciadas ao fim do \hyperref[sec:simulacao-rjms]{Capítulo 2}. A primeira dessas extensões
+é o consumo de sinais ambientais externos ao longo do tempo de execução da simulação, 
+onde o simulador reproduz atualizações datadas de intensidade de carbono, intensidade hídrica,
+PUE e WUE para todos os hosts em uma zona do SimGrid. Dessa forma, os quatro parâmetros
+operacionais acompanham as séries derivadas na \hyperref[sec:derivacao-sinais]{Seção 5.2}.
+A segunda extensão é a contabilização da pegada ambiental por job, onde como descrito anteriormente,
+a pegada ambiental de um job é registrada através da diferença entre os acumulados
+operacionais de cada host alocado ao job no instante de término e no instante
+de início. As componentes operacionais e incorporadas da pegada ambiental são
+exportadas separadamente no Batsim, o que preserva no dado a fronteira estabelecida
+pelo \hyperref[sec:pegadas-ambientais]{Capítulo 2}, visto que o como o escalonador tem o controle
+apenas das operacionais, somá-las as incoporadas ocultaria tal distinção.
+
+O modelo possui fronteiras declaradas, com essas fronteiras sendo de duas naturezas
+distintas. O primeiro tipo de fronteira se dá pela própria construção do modelo, com 
+características e intervenções são preteridas a fim de simplificar o desenvolvimento, 
+execução e análise do modelo. Neste trabalho, contabilização dos recursos de rede 
+e armazenamento dos nós, desligamento de nós ociosos e variação de potência na execução de um mesmo job
+são exemplos de limites do modelo. O segundo tipo de fronteira se dá pela indisponibilidade
+de dados, onde o perfil de potência por tipo de aplicação é um exemplo de limite do modelo.
+Os traços com o histórico dos jobs registram a quantidade de nós requisitados e a duração
+de execução, mas não a natureza da aplicação, pensando por exemplo em uma aplicação 
+com alto grau de processamento, em contraste com uma aplicação com alto grau de acesso ao disco.
+
+Por último, o modelo de pegada ambiental é expandido para permitir a preempção dos jobs,
+ou seja, permitir que um job seja interrompido e retomado posteriormente, com a liberação dos 
+nós alocados a cada pausa. Para isso, é necessário que o modelo de pegada ambiental
+considere a energia consumida para a pausa e retomada do job, que é obtida através de 
+um novo parâmetro operacional.
+
+\section{Derivação dos sinais ambientais}
+\label{sec:derivacao-sinais}
+
+AA

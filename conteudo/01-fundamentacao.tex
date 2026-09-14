@@ -5,6 +5,7 @@
 \chapter{Fundamentação}
 
 \section{Escalonamento em lote em HPC}
+\label{sec:escalonamento}
 
 Sistemas de computação de alto desempenho são complexos por natureza, com cada nó sendo composto
 por inúmeras unidades de processamento, sejam CPUs ou GPUs, além dos dispositivos de memória (RAM, SSDs)
@@ -204,7 +205,7 @@ a todo o grupo de gases cuja emissões contribuem para o aquecimento global. Par
 calcular a quantidade de carbono emitido decorrente da operação de um sistema computacional, ou, resumidamente, 
 a pegada de carbono, é necessário multiplicar a energia elétrica consumida para alimentar o hardware 
 pela intensidade de carbono da eletricidade. A intensidade de carbono da eletricidade é a quantidade de carbono emitida para gerar uma certa 
-quantidade de energia elétrica, geralmente expressa em $gCO_{2}eq/kWh$, ou seja, gramas de $CO_{2}$ e gases equivalentes
+quantidade de energia elétrica, geralmente expressa em $kgCO_{2}eq/kWh$, ou seja, kilogramas de $CO_{2}$ e gases equivalentes
 emitidos por kWh de energia elétrica gerada.
 
 Simplificadamente, definimos fonte como uma categoria de produção de energia elétrica (por queima de carvão, fissão nuclear, 
@@ -324,6 +325,7 @@ certo job para executar outros jobs, podendo converter energia ociosa em energia
 demanda na fila. O Capítulo 8 trata dessa terceira alavanca e dos custos que ela introduz.
 
 \section{Simulação de RJMS}
+\label{sec:simulacao-rjms}
 
 O constante aumento em complexidade e pura escala dos sistemas de HPC em produção acaba causando
 um aumento proporcional na dificuldade de estudar o funcionamento e de desenvolver modificações
