@@ -33,11 +33,13 @@ energia consumida pelo nós ligados mas não alocados a nenhum job sem portador.
 Essa parcela é relevante, visto que a energia consumido por um host ocioso
 é justamente uma das quantidades que o escalonador tem controle sobre. Considerando
 um modelo de job rígido, com alocação exclusiva, a pegada ambiental de um job
-pode ser recuperada através da diferença entre os valores acumulados 
-nos instantes de inicio e fim de todos os seus hosts alocados.
+pode ser derivada exlusivamente através da diferença entre os valores acumulados 
+nos instantes de inicio e fim de todos os seus hosts alocados. Disso, um acumulador
+para cada job se torna redundante, visto que acarretaria em complexidade desnecessária de 
+manutenção.
 
 A contabilidade elementar realizada pelo modelo converte potência em energia, e posteriormente
-energia em pegada ambiental. Considerando um intervalo de tempo $\Delta t$ segundos, um host em um estado de potência
+energia em pegada ambiental. Considerando um intervalo de tempo $\Delta t$ segundos, um host $h$ em um estado de potência
 consumindo $P$ watts consume uma energia de TI de $E = \frac{P \times \Delta t}{3,6 \times 10^6}$, expressa em kWh.
 A partir da contabilização da energia consumida, o modelo acumula a pegada ambiental em três
 acumuladores operacionais distintos, um para a pegada de carbono, outro para 
@@ -45,17 +47,17 @@ a pegada hídrica no sítio e outro para a pegada hídrica fora do sítio. Além
 dois valores estáticos armazenam as pegadas incorporadas, tanto para carbono quanto para água.
 As pegadas operacionais são calculadas, respectivamente, pelas equações: 
     \begin{equation}
-        \label{carbon_footprint}
+        \label{eq:pegada_carbono}
         F^{C}_{op} \leftarrow F^{C}_{op} + E \times PUE \times I_{C}
     \end{equation}
 
     \begin{equation}
-        \label{water_onsite_footprint}
+        \label{eq:pegada_hidrica_onsite}
         F^{W}_{on} \leftarrow F^{W}_{on} + E \times WUE
     \end{equation}
 
     \begin{equation}
-        \label{water_offsite_footprint}
+        \label{eq:pegada_hidrica_offsite}
         F^{W}_{off} \leftarrow F^{W}_{off} + E \times PUE \times I_{W}
     \end{equation}
 
@@ -68,17 +70,48 @@ posteriormente multiplicado pelo WUE, e apenas por ele. Assim, manter as três p
 separadas preserva a distinção entre consumo direto e indireto, além de permitir que
 cada uma seja contabilizada ou desativada de forma independente. 
 
-A atualização do estado de um host no modelo é feita 
-A acumulação das pegadas operacionais é feita instante a instante pelo modelo, motivado
+Sendo $\mathcal{H}_{j}$ o conjunto de hosts alocados ao job $j$, e $t_{0}$ e $t_{d}$ os
+instantes de início e término da sua execução, a pegada de carbono do job é dada por
+
+\begin{equation}
+    F^{C}_{j} = \sum_{h \in \mathcal{H}_{j}}
+        \left[ F^{C}_{op,h}(t_{d}) - F^{C}_{op,h}(t_{0}) \right]
+    \label{eq:pegada-carbono-job}
+\end{equation}
+
+e as duas pegadas hídricas são obtidas da mesma forma, a partir dos 
+acumuladores correspondentes.
+
+A atualização do estado de um host no modelo é feita de maneira adiada sempre 
+que ocorre um evento, que pode ser de duas famílias. A primeira família 
+são os eventos próprios do SimGrid, como eventos de início 
+ou fim do job, ligamento ou desligamento do host, mudança de pstate, com todos
+esses ocasionando da mudança de potência de host. A outra família são os eventos
+de atualização dos parâmetros operacionais do host, que são replicadas pelo lado
+do Batsim a cada nova amostra do sinal ambiental em questão.
+
+A acumulação das pegadas operacionais pelo modelo é feita a cada novo evento, motivado
 pelo fato de que as intensidades ambientais, tanto de carbono quanto de água, variam ao 
-longo do tempo em que um job é executado. Por exemplo, ao se considerar um traço com intensidade
-variando em janelas de 15 minutos, um job com execução de 6 horas atravessaria 24 janelas de 
-intensidades diferentes. Com isso, caso a pegada ambiental fosse calculada a partir da energia
-total consumida pelo job e da intensidade média do traço, o resultado seria uma aproximação
-grosseira da pegada ambiental real do job, descartando justamente a informação sobre a qual
-um política de escalonamente atua sobre. A acumulação instante a instante torna possível
-a comparação de políticas de escalonamentos alternativas em relação a pegada ambiental, 
-não apenas em relação a energia consumida.
+longo do tempo em que um job é executado. Como a potência do host e as intensidades
+ambientais permanecem constante entre dois eventos consecutivos, essa acumulação
+discreta é equivalente a integral apresentada na \hyperref[eq:pegada]{Equação 2.1}. 
+A variação dos sinais ambientais ocorre em uma janela de tempo menor do que a duração de jobs
+maiores, de modo que um job atravessa diversos valores de intensidade ao longo da sua
+execução. Considerando um traço com intensidade variando em janelas de 15 minutos, um job com 
+6 horas de execução atravessaria 24 janelas de intensidades diferentes. Como mencionando anteriormente,
+uma política de escalonamento ambientalmente consciente se importa principalmente com "quando" 
+um job roda.
+
+Uma possível alternativa a esse modelo de contabilidade seria mulitplicar a energia total
+consumida pelo job pela média das intensidades em sua janela de execução. Com potência ativa
+e alocação exclusiva, esse produto coincide com o valor acumulado evento a evento. A escolha pelo
+modelo de acumulação se dá pelo fato de que é essa igualdade de valores depende que a potência do 
+host permaneça constante ao longo da janela de execução do job. Esse hipótese deixa de valer
+caso sejam considerados mecanismos de pausa e retomada de job, ou de alteração na potência intra-job.
+A forma acumulada permanece correta para esses casos, de modo que tais extensões alteram apenas
+a política que consome o modelo, não a contabilidade que o define. Essa contabilidade, portanto,
+torna possível a comparação de políticas de escalonamento alternativas quanto à pegada ambiental,
+e não apenas quanto à energia consumida.
 
 As equações acima contém quatro parâmetros operacionais que são configuráveis por
 host do SimGrid. Esses parâmetros são: o PUE, que não tem dimensão; 
@@ -103,7 +136,7 @@ a pegada ambiental de um job é registrada através da diferença entre os acumu
 operacionais de cada host alocado ao job no instante de término e no instante
 de início. As componentes operacionais e incorporadas da pegada ambiental são
 exportadas separadamente no Batsim, o que preserva no dado a fronteira estabelecida
-pelo \hyperref[sec:pegadas-ambientais]{Capítulo 2}, visto que o como o escalonador tem o controle
+pelo \hyperref[sec:pegadas-em-computacao]{Capítulo 2}, visto que o como o escalonador tem o controle
 apenas das operacionais, somá-las as incoporadas ocultaria tal distinção.
 
 O modelo possui fronteiras declaradas, com essas fronteiras sendo de duas naturezas
