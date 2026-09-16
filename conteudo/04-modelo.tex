@@ -159,4 +159,66 @@ um novo parâmetro operacional.
 \section{Derivação dos sinais ambientais}
 \label{sec:derivacao-sinais}
 
-AA
+A plataforma de transparência da \emph{ENTSO-E} (\textit{European Network of 
+Transmission System Operators for Electricity}), que foi estabelecida a partir da 
+Regulação N. 543/2013, tem como objetivo principal reduzir o uso de informação privilegiada
+e nivelar as condições de competição entre geradores, varejistas e negociantes do 
+mercado de energia elétrica da Europa. Os dados de geração, transmissão, carga, balanceamento
+são fornecidos para a plataforma pelos Operadores dos Sistemas de Transmissão (\textit{Transmission 
+System Operators}, ou TSOs) e pelos geradores de energia, geralmente por intermédio de
+provedores de dados intermediários. 
+
+Os sinais ambientais são derivados dos dados obtidos
+dessa plataforma, por três motivos principais. O primeiro é que a plataforma disponibiliza
+os dados de geração real por tipo de produção, que é justamente o nível de detalhe necessário
+para compor a matriz elétrica de uma região. Além disso, esses dados possuem uma resolução sub-horária,
+com granularidades de até 15 minutos para certas regiões como a Alemanha ou a Áustria, 
+granularidade essa fina o suficiente para acompanhar a variação durante a execução de um mesmo job.
+Por fim, os dados são reportados na mesma estrutura para regiões geográficas distintas, dispensando
+harmonização adicional entre diferentes regiões. Hirth et al. \citeyear{entsoe-limitations} documentam lacunas de cobertura
+entre diferentes países e tecnologia, além da ausência de revisões subsequentes nos dados em relação a outras fontes, 
+Porém, essas questões não se mostraram empecilhos para o uso da plataforma no contexto deste trabalho.   
+
+Os dados brutos obtidos da plataforma da ENTSO-E passam por uma etapa de limpeza antes de serem
+transformados nos arquivos de traços. Fontes de armazenamento são excluídas da composição das matrizes
+visto que a composição das fontes de geração que fornecem energia para carregar o sistema de armazenamento,
+atribuição temporal e as perdas de \textit{round-trip} não são representadas na plataforma. Fontes de geração
+que não reportam geração positiva em nenhum momento também são excluídas. Valores líquidos remanescentes
+podem ficar negativos, o que distorceria a média ponderada, e por isso são truncados para 0. Além disso,
+observa-se que o total de geração de uma certa região nunca cai para abaixo de 35\% da mediana da região, então qualquer
+instante de tempo que reporte um total abaixo de 20\% é tratado como dado ausente e interpolado. Algumas regiões
+possuem dados de geração na granularidade de 15 minutos, enquanto outras possuem dados com granularidade horária.
+Como a granularidade de 15 minutos está mais próxima dos ciclos de decisão do escalonador, e a composição das
+matrizes tendem a possuir mudanças graduais com a passagem do tempo, pontos de 15 minutos entre horas
+são preenchidos a partir de interpolação linear.  
+
+A intensidade ambiental de um sinal $e$, com $e$ podendo ser carbono ou água, é a média dos
+fatores ponderada pela geração instantânea, dada pela equação
+
+\begin{equation*}
+    I_{e,c}(t) = \frac{\sum_{s}G_{c,s}(t)f_{e,s}}{\sum_{s}G_{c,s}(t)}
+    \label{eq:intensidade-ambiental-pais}
+\end{equation*}
+
+onde $c$ indica o país, $s$ a fonte de produção, $G_{c,s}(t)$ a geração em MW, e $f_{e,s}$ 
+é um fator fixado da fonte de produção, expresso em $gCO_{2}eq/kWh$ para carbono e $L/kWh$ para
+água. Como mencionado no \hyperref[sec:pegadas-em-computacao]{Capítulo 2}, esses fatores fixados indicam
+a quantidade de impacto ambiental resultante da geração de uma certa quantidade de energia elétrica.
+Os fatores de carbono são estimativas que compreendem todo o ciclo de vida de uma certa
+fonte de produção, retirados diretamente da avaliação da UNECE 2022 quando disponível ou do IPCC 2014
+caso contrário. Os fatores de água são as médias do consumo operacional de água por uma determinada fonte de produção,
+retirados de \textcite{water-macknick-2012}. O trabalho assume que os fatores permanecem fixos para diferentes plantas de 
+geração de energia, entre diferentes países e anos visto que a plataforma da ENTSO-E não reporta as características
+no nível da usina de geração de energia que uma atribuição mais detalhada fosse requisitar. Como o escalonador reage
+simplesmente à variação entre as intensidades de diferentes instantes no tempo, invés de realizar uma comparação com níveis
+absolutos já registados, essa simplficação pesa menos do que pesaria numa contabilidade absoluta, por exemplo. 
+
+Os países dos quais extraímos os dados dos sinais ambientais para este trabalho são França, Alemanha e Polônia, extraídos
+da mesma fonte e a partir do mesmo período, com os fusos alinhados posteriormente. A composição das matrizes elétricas desses países
+varia bastante, com a Polônia sendo dominada por uma matriz mais suja, com alta dependência de termelétricas, enquanto a França
+possui uma matriz considerada verde, com dominância da geração por fusão nuclear. Por fim, a Alemanha apresenta uma matriz 
+mista, com uma boa representação de fontes sustentáveis como eólica e solar durante o dia em períodos favoráveis, mas também
+uma alta queima de combustíveis fósseis para suprir quando as fontes sustentáveis não estão disponíveis. Ao se comparar os valores de intensidade
+ambiental entre esses países nota-se que o contraste entre as matrizes não é unidimensional. Enquanto a França possui a menor
+intensidade de carbono em média ($36.4 gCO_{2}eq/kWh$) e a maior intensidade hídrica em média ($3.320 L/kWh$), a Polônia
+possui a maior intensidade de carbono em média ($569.4 gCO_{2}eq/kWh$) e a menor intensidade hídrica em média ($1.587 L/kWh$).
