@@ -159,9 +159,9 @@ um novo parâmetro operacional.
 \section{Derivação dos sinais ambientais}
 \label{sec:derivacao-sinais}
 
-A plataforma de transparência da \emph{ENTSO-E} (\textit{European Network of 
+A plataforma de transparência da \emph{ENTSO-E}~\citep{entsoe-platform} (\textit{European Network of
 Transmission System Operators for Electricity}), que foi estabelecida a partir da 
-Regulação N. 543/2013, tem como objetivo principal reduzir o uso de informação privilegiada
+Regulação N. 543/2013~\citep{eu-regulation-543-2013}, tem como objetivo principal reduzir o uso de informação privilegiada
 e nivelar as condições de competição entre geradores, varejistas e negociantes do 
 mercado de energia elétrica da Europa. Os dados de geração, transmissão, carga, balanceamento
 são fornecidos para a plataforma pelos Operadores dos Sistemas de Transmissão (\textit{Transmission 
@@ -175,7 +175,7 @@ para compor a matriz elétrica de uma região. Além disso, esses dados possuem 
 com granularidades de até 15 minutos para certas regiões como a Alemanha ou a Áustria, 
 granularidade essa fina o suficiente para acompanhar a variação durante a execução de um mesmo job.
 Por fim, os dados são reportados na mesma estrutura para regiões geográficas distintas, dispensando
-harmonização adicional entre diferentes regiões. Hirth et al. \citeyear{entsoe-limitations} documentam lacunas de cobertura
+harmonização adicional entre diferentes regiões. \textcite{entsoe-limitations} documentam lacunas de cobertura
 entre diferentes países e tecnologia, além da ausência de revisões subsequentes nos dados em relação a outras fontes, 
 Porém, essas questões não se mostraram empecilhos para o uso da plataforma no contexto deste trabalho.   
 
@@ -205,7 +205,7 @@ onde $c$ indica o país, $s$ a fonte de produção, $G_{c,s}(t)$ a geração em 
 água. Como mencionado no \hyperref[sec:pegadas-em-computacao]{Capítulo 2}, esses fatores fixados indicam
 a quantidade de impacto ambiental resultante da geração de uma certa quantidade de energia elétrica.
 Os fatores de carbono são estimativas que compreendem todo o ciclo de vida de uma certa
-fonte de produção, retirados diretamente da avaliação da UNECE 2022 quando disponível ou do IPCC 2014
+fonte de produção, retirados diretamente da avaliação da \textcite{unece-carbon} quando disponível ou do \textcite{carbon-ipcc-2014}
 caso contrário. Os fatores de água são as médias do consumo operacional de água por uma determinada fonte de produção,
 retirados de \textcite{water-macknick-2012}. O trabalho assume que os fatores permanecem fixos para diferentes plantas de 
 geração de energia, entre diferentes países e anos visto que a plataforma da ENTSO-E não reporta as características
@@ -222,3 +222,6 @@ uma alta queima de combustíveis fósseis para suprir quando as fontes sustentá
 ambiental entre esses países nota-se que o contraste entre as matrizes não é unidimensional. Enquanto a França possui a menor
 intensidade de carbono em média ($36.4 gCO_{2}eq/kWh$) e a maior intensidade hídrica em média ($3.320 L/kWh$), a Polônia
 possui a maior intensidade de carbono em média ($569.4 gCO_{2}eq/kWh$) e a menor intensidade hídrica em média ($1.587 L/kWh$).
+
+\section{Ambiente experimental comum}
+\label{sec:ambiente-experimental-comum}
