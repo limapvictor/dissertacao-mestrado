@@ -225,3 +225,78 @@ possui a maior intensidade de carbono em média ($569.4 gCO_{2}eq/kWh$) e a meno
 
 \section{Ambiente experimental comum}
 \label{sec:ambiente-experimental-comum}
+
+As campanhas presentes nos capítulos seguintes deste trabalho utilizam a bancada construída neste capítulo como base,
+variando apenas os fatores próprios inerentes a cada uma das políticas testadas. A utilização dessa referência comum
+torna os resultados entre as políticas comparáveis, pois o que muda no final são as decisões tomadas pelo algoritmo
+do escalonador derivado da política, não o ambiente sobre o qual ele roda. 
+
+As janelas ambientais desse experimento em comum cobrem a sazonalidade dos fatores ambientais por construção. Cada um
+dos três países citados na seção anterior contribui com 12 janelas de 28 dias cada, com três janelas aleatórias para cada
+estação sorteadas sob uma semente de \emph{RNG} (do ingles \textit{Random Number Generator}, ou Gerador de Números Aleatórios)
+fixa. Dessa forma, a amostra cobre toda a variação sazonal dos sinais da rede e o sorteio é reprodutível para rodadas 
+posteriores. A duração de 28 dias abrange quatro ciclo semanais completos, começando sempre na segunda-feira às 0h, o que
+confere peso igual aos padrões de intensidade de dias úteis e de fim de semana. Dessa forma, nenhuma conclusão obtida
+das políticas posteriores depende de ter caído especificamente numa estação e período de tempo favorável.
+
+Os extratos de carga de trabalho foram extraídos a partir de dois sistemas de diferentes escalas presentes no \textit{Los Alamos National Laboratory}
+(\cite{lanl}). O primeiro sistema foi o \textit{cluster LANL Mustang}, um cluster de HPC que funcionou entre 2011 e 2016, 
+com foco em \textit{capactiy computing}, ou seja, um sistema cujo foco está na produtividade coletiva, 
+apresentando um bom custo benefício e recursos computacionais de propósito geral, visando assim atender um grande número 
+de usuários com uma alta vazão. O segundo sistema foi o supercomputador \textit{LANL Trinity}, sistema usado para \textit{capability
+computing}, ou seja, um sistema cujo foco é a computação de ponta de fato, focado em resolver problemas grandes e complexos
+da forma mais rápida e eficiente possível. Os traços de cargas de trabalho desses sistemas foram extraídos a partir dos datasets
+fornecidos por \textcite{atlas-lanl}, contendo os dados de toda execução do \textit{Mustang} e os dados de execução entre Fevereiro
+e Abril de 2017 do \textit{Trinity}, período em que o sistema estava operando sobre modo de \textit{OpenScience}.
+
+Os extratos então são escolhidos a partir de procedimento automatizado sobre o traço completo de cada um desses sistemas.
+As janelas candidatas são todas as janelas de 4 semanas de duração, começando numa segunda-feira às 00:00 UTC e deslocadas
+de uma em uma semana. Cada uma dessas janelas é descrita a partir de métricas normalizadas pela quantidade de nós do sistema
+em específico, de modo que os limiares valem para ambos. Dado que as heurísticas serão comparadas contra o EASY backfilling,
+é importante que a janela escolhida de fato possibilite o backfilling dos jobs, além de não ser dominada por um possível
+evento atípico. A partir disso, se define uma janela candidata como viável caso: (i) no máximo 5\% das horas totais possuem 
+utilização abaixo de 20\%, e durante toda a janela não existe nenhum trecho com tal utilização por mais que 6 horas seguidasm
+o que exclui possíveis drenos e manuteções; (ii) nenhum usuário é reponsável por mais de metada das submissões de jobs; (iii) 
+jobs largos, ocupando pelo menos 10\% dos nós totais do sistema, representam somados pelo menos 20\% do tempo total 
+ocupado pelos nós, para que o sistema de fato possua reservas; (iv) jobs estreitos e curtos, ocupando no máximo 1\% dos
+nós do sistema e com no máximo 2h, representam pelo 30\% dos jobs, para que de fato exista o que encaixar com o backfilling.
+
+Entre as janelas viáveis disponíves, são selecionadas duas, visando o exercício de dois regimes de cargas de trabalho. 
+O primeiro regime é um regime \textit{slack}, onde o sistema está ocupado mas não saturado, o que o torna aparente
+quanto ao deslocamento temporal dos jobs. Para se configurar como uma janela pertecente a esse regime, a utilização dos nós deve estar entre 50\% e 90\%, e no máximo 30\% de horas saturadas no total, onde uma
+hora é definida como saturada por ter mais de 95\% dos seus nós utilizados. O segundo regime é um regime estressado, onde o sistema
+está altamente saturado, o que aumenta a importância do backfilling. Uma janela deve possuir entre 30\% e 50\% de 
+suas horas saturadas e utilização média de até 95\% para ser caracterizada como saturada. Em cada um desses regimes, as janelas
+viáveis são ordenados a partir da soma de dois índices padronizados, com a de maior soma sendo escolhida. Para o regime
+\textit{slack}, soma-se o tamanho médio da fila com o desvio padrão da utilização, sendo que a segunda métrica favorece 
+uma utilização oscilante, deixando espaço para os jobs serem deslocados. Para o regime estressado, soma-se o tamanho médio da fila
+com a fração de horas saturadasm, com a segunda métrica exercendo uma pressão contínua sobre o sistema. 
+Para ambos os casos, uma fila média maior favorece janelas com demanda sustentada.  
+
+As datas entre os traços de sinais ambientais e os traços de carga de trabalho não se alinham, pois os sinais se referem a dados
+entre 2018 e 2025, enquanto as cargas de trabalho entre 2011 e 2017. Esse desalinhamento é aceito por construção, justificado pelo fato
+de que o objeto de estudo é a comparação de diferentes políticas de escalonamento a um sinal ambiental com uma estrutura temporal
+e sazonal, e não especificamente exatamente o que estava acontencendo no sistema específico quando a carga foi gerada. Jobs que já estavam
+rodando ou aguardando na fila no momento de início do extrato $T_{0}$ são submetidos novamente em $t = 0$ para o escalonador.
+Os jobs que já estavam em execução entram no instante inicial com o tempo de execução e walltime resultantes, na mesma ordem
+em que haviam começado a executar. Similarmente, jobs que esperavam na fila no momento $T_{0}$ 
+são submetidos ao escalonador em $t = 0$ na mesma ordem em que haviam sido submetidos originalmente.
+
+Como já mencionado, o modelo de job é rígido. Nos traços históricos de carga de trabalho, os jobs possuem informados
+a quantidade de nós requisitados, o walltime e o tempo real de execução no sistema. Cada job é enviado ao Batsim com a mesma 
+quantidade de nós requisitados, modelado com o perfil de tarefa \textit{parallel\_homogeneous}. Nesse perfil, a taxa de progresso 
+de computação continua constante durante a execução do job. Como a taxa é definida pelo produto entre o tempo de execução pela velocidade
+do nó na plataforma, cada job na simulação dura o mesmo tempo de execução que sua contraparte real. A comunicação não 
+foi modelada. 
+
+Ambas plataformas são modeladas de forma homogênea, com todos nós possuindo a mesma velocidade. Além disso, os nós
+são considerados de núcleo único. Como o perfil de tarefa do Batsim reproduz exatamente o tempo de execução dos jobs,
+as velocidades de processamento \footnote{110,4 Gflop/s para o Mustang e 1177,6 Gflop/s para o Trinity} 
+dos nós são nominais, não afetando nenhum resultado. Os valores de potência ativa foram
+estimados a partir do TDP (\textit{Thermal Design Power}) especificado pelos fabricantes para os processadores dos nós em questão.
+O Mustang, cujos nós são compostos por dois processadores \textit{AMD Opteron 6176} com TDP de 115 W, foi estimado com 320 W, onde os 90 W restantes 
+foram estimados como a potência consumida pela memória e chassi. O Trinity, cujos  nós são compostos por dois processadore
+\textit{Intel Xeon E5-2698 v3} com TDP de 135 W, foi estimado com 270 W, sem considerações quanto a potência consumida
+pela memória ou chassi. As duas plataformadas tiveram seus nós modelados com o consumo de 10 W no estado de potência ocioso. 
+Nenhuma das plataformas possui qualquer modelagem de ligações de rede, rotas de rede ou discos de armazenamento, portanto
+a potência consumida por rede e armazenamento pela plataforma no SimGrid é efetivamente zero. 
