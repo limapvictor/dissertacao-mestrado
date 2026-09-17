@@ -300,3 +300,20 @@ foram estimados como a potência consumida pela memória e chassi. O Trinity, cu
 pela memória ou chassi. As duas plataformadas tiveram seus nós modelados com o consumo de 10 W no estado de potência ocioso. 
 Nenhuma das plataformas possui qualquer modelagem de ligações de rede, rotas de rede ou discos de armazenamento, portanto
 a potência consumida por rede e armazenamento pela plataforma no SimGrid é efetivamente zero. 
+
+A bancada experimental não exercita parte do instrumento, e as ausências se distinguem em três naturezas.
+A primeira ausência se dá por um parâmetro presente no modelo, mas neutralizado durante as rodadas experimentais.
+De exemplo, as plataformas não atribuem valor para o PUE, WUE ou pegadas incorporadas dos seus nós. O modelo tem a capacidade
+de acumular a pegada, mas a campanha não usa. A segunda ausência se dá pela falta dos dados necessários. Por exemplo,
+os traços dos jobs não indicam qual o perfil de potência de cada aplicação, o que impossibilita possíveis atuações do escalonador
+quanto a isso. Por fim, a terceira ausência são alavancas não modeladas, que mudariam o objeto de estudo por si.
+Por exemplo, a inclusão de jobs moldáveis destruiria a premissa de invariância, ou a possibilidade de DVFS permitiria
+a modificação da energia ativa, que se mantém constante de propósito.
+
+As comparações entre as políticas de escalonamento contra o EASY backfilling são feitas de forma pareada, onde 
+se fixa o trio \emph{janela-sistema-extrato} para ambos os lados. Esse mecanismo é justificado pelo fato de que
+a variabilidade da pegada ambiental entre as janelas é maior do que o próprio efeito procurado, o que acaba sendo
+eliminado ao se realizar o pareamento. 
+
+\section{Verificação do instrumento}
+\label{sec:verificacao-instrumento}
