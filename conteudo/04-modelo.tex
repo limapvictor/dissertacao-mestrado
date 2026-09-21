@@ -315,5 +315,46 @@ se fixa o trio \emph{janela-sistema-extrato} para ambos os lados. Esse mecanismo
 a variabilidade da pegada ambiental entre as janelas é maior do que o próprio efeito procurado, o que acaba sendo
 eliminado ao se realizar o pareamento. 
 
-\section{Verificação do instrumento}
-\label{sec:verificacao-instrumento}
+\section{Conferência e sensibilidade do instrumento}
+\label{sec:conferencia-instrumento}
+\subsection{Conferência externa da série de carbono}
+\label{subsec:conferencia-externa-carbono}
+O modelo de pegada de carbono derivado dos dados de geração de energia obtidos da ENTSO-E foi conferido contra
+uma referência independente, buscando entender se os níveis e padrões observados para Alemanha, França e Polônia se
+mantinham. A conferência foi realizada contra o \textit{Yearly Electricity Data} do \textit{Ember}, que é 
+um instituto independente de pesquisa em energia. Esse instituto publica dados das intensidades nacionais anuais
+de geração e emissão de $CO_{2}$, a partir da compilação de diversas fontes nacionais e multinacionais. Tal escolha é justificada
+pelo fato de que esse conjunto de dados é a correspondência pública mais próxima do modelo desta dissertação, visto que ambas
+utilizam emissões de $CO_{2}$ nacionais considerando todo o ciclo de vida e baseadas na produção de energia. 
+
+Comparando os dados do Ember entre 2018 e 2024 
+\footnote{O Ember apontava que os dados de 2025 podiam ter sido extraídos em parte dos dados de produção de energia retirados da ENTSO-E} com os
+dados gerados pelo modelo, observa-se que a ordenação da pegada de carbono permance, com Polônia, Alemanha e França, nessa
+orded, da maior para a menor pegada. Além disso, foi realizada uma comparação entre as médias das intensidades nacionais, 
+dividindo as emissões totais pela geração total de energia. Os valores de correlação de Pearson entre as médias anuais das duas fontes 
+para Alemanha (0,987), França (0,994) e Polônia (0,999) indicam uma altíssima correlação entre ambos valores. Com isso, 
+a conferência realizada sustenta tanto a ordenação quanto as tendências da série ao longo do tempo, ou seja, em que ano a intensidade
+subiu, em que ano caiu, e quanto proporcionalmente a intensidade se moveu de um ano para o outro. E são justamente essas tendências ao longo do tempo,
+a forma da série, que o escalonador consume para tomar suas decisões. 
+
+Apesar do formato das séries ser altíssimamente correlacionado, os seus níveis absolutos não são. As médias são mais baixas
+em 16,9\% para a Alemanha, 34\% para a França e 19,7\% para a Polônia. A maior parte dessa diferença é explicada através dos
+próprios fatores de intensidade para a Alemanha e Polônia. As médias de emissões de carbono para carvão e gás natural
+relatadas na UNECE consideram casos com a aplicação de mecanismos de captura de carbono, o que diminui os valores totais de pegada
+derivados do modelo. Ao modificar esses fatores do modelo para valores mais altos, desconsiderando mecanismos de captura de carbono implícitos,
+os níveis das séries geradas ficam bem mais próximos em relação aos do Ember, com a Alemanha tendo valores 4,2\% mais baixos e
+a Polônia 2,2\% mais altos. Para a França, essa mudança resulta em uma série 14\% mais baixa ainda, o que indica que existe um resíduo nos dados
+que a harmonização dos grupos e fatores de intensidade não remove. 
+
+Para a rede europeia, não existe nenhum comparador público de intensidade hídrica independente da construção usada 
+neste modelo. O \textit{LBNL Water Impact Tool} \footnote{\url{https://waterimpacttool.lbl.gov}} \citep{water-siddik-2024} 
+é um comparador público horário de intensidade hídrica, porém seus dados são referentes
+as autoridades de balanceamento de energia dos EUA. Para a Europa, a iniciativa \textit{Wattnet} \footnote{\url{https://dashboard.wattnet.eu/map?metric=footprint&dimension=water&scope=life-cycle}} 
+\citep{wattnet-2026} fornece um painel com as
+pegadas ambientais de carbono e água resultantes da geração de energia elétrica pela rede europeia, porém sua construção
+é a mesma do modelo, com os dados de geração de energia sendo extraídos da ENTSO-E, mudando apenas os fatores de intensidade
+hídrica, que são extraídos de \textcite{vanham-europe-2019}.
+  
+  
+\subsection{Sensibilidade aos fatores hídricos}
+\label{subsec:sensibilidade-hidrica}
