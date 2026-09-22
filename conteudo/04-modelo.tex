@@ -160,9 +160,9 @@ um novo parâmetro operacional.
 \section{Derivação dos sinais ambientais}
 \label{sec:derivacao-sinais}
 
-A plataforma de transparência da ENTSOE-E ~\citep{entsoe-platform} (\textit{European Network of
+A plataforma de transparência da ENTSO-E ~\citep{entsoe-platform} (\textit{European Network of
 Transmission System Operators for Electricity}), que foi estabelecida a partir do
-Regulamento (UE) n. º 543/2013~\citep{eu-regulation-543-2013}, busca reduzir o uso de informação privilegiada
+Regulamento (UE) n.º 543/2013~\citep{eu-regulation-543-2013}, busca reduzir o uso de informação privilegiada
 e nivelar as condições de competição entre geradores, varejistas e comercializadores do 
 mercado de energia elétrica da Europa. Os registros de geração, transmissão, carga e balanceamento
 chegam à plataforma através dos operadores dos sistemas de transmissão (\textit{Transmission 
@@ -178,25 +178,25 @@ A terceira é a uniformidade, pois todos os países publicam os valores na mesma
 o que permite que as três séries sejam derivadas através de um único procedimento. A base, contudo, tem limitações conhecidas. 
 Para os seus primeiros anos de operação, \textcite{entsoe-limitations} documentam lacunas de cobertura
 entre diferentes países e tecnologias, inconsistências na classificação de usinas por tipo de produção e alguns desvios persistentes
-nos dados quando comparados às estatísticas oficiais, motivados pela ausência de revisões posteriores nos dados que são publicados na
+nos dados quando comparados às estatísticas oficiais, além da ausência de revisões posteriores nos dados que são publicados na
 base próximo do tempo real. Por consequência, apesar da necessidade de uma verificação mais detalhada caso o objetivo seja uma contabilidade oficial,
-a plataforma se mostra adqueada para acompanhar a variação e estimar a composição das matrizes elétricas dos países
+a plataforma se mostra adequada para acompanhar a variação e estimar a composição das matrizes elétricas dos países
 europeus.  
 
 Os valores brutos, de 2018 a 2025, passam por uma etapa de limpeza antes de serem
 transformados nos arquivos de traços consumidos pelo simulador. Fontes de armazenamento (baterias e hidrelétricas reversíveis) 
-são excluídas da participação nas matrizes uma vez que a plataforma não identifica a origem dos tipos de produção que as carregou,
+são excluídas da participação nas matrizes uma vez que a plataforma não identifica a origem da energia que as carregou,
 o momentos em que ela foi gerada nem as perdas de \textit{round-trip}. Também são descartados os tipos de produção
 que não informam geração positiva em nenhum momento no período. Como os valores são líquidos, ou seja, a plataforma 
-informa a diferença de cada tipo descontado pelo consumo de energia, alguns valores remanescentes
-podem ficar negativos \footnote{Na França, por exemplo, o valor líquido da hulha é negativo em cerca de um terço do período considerado}, 
+informa, para cada tipo de produção, a diferença entre a geração pelo próprio consumo de energia registrado para esse mesmo tipo, alguns valores remanescentes
+podem ficar negativos\footnote{Na França, por exemplo, o valor líquido da hulha é negativo em cerca de um terço do período considerado.}, 
 o que distorceria a média ponderada, e por isso são truncados para 0. Valores ausentes de um tipo válido também são tratados 
-como produção nula. Além disso, observa-se que o total de geração de um certa país nunca cai para abaixo de 
+como produção nula. Além disso, observa-se que o total de geração de um certo país nunca cai abaixo de 
 35\% da mediana do país, de modo que qualquer instante de tempo que registre um total abaixo de 20\% 
 é tratado como dado ausente e consequentemente preenchido por interpolação. A Alemanha
-publica registros de energia gerada na granularidade de 15 minutos, enquanto a França e a Polônia apresentam registros com granularidade horária.
-Todas as séries são reamostradas para uma grade comum com resolução de 15 minutos, com os pontos intermediários das séries 
-horários sendo preenchidos a partir de interpolação linear. Isso é justificado pelo fato de que a resolução temporal de 15 
+publica registros de energia gerada na granularidade de 15 minutos, enquanto a França e a Polônia apresentam registros com granularidade horária
+até Dezembro e Junho de 2024, respectivamente. Todas as séries são reamostradas para uma grade comum com resolução de 15 minutos, com os pontos intermediários das séries 
+horárias sendo preenchidos a partir de interpolação linear. Isso é justificado pelo fato de que a resolução temporal de 15 
 minutos está mais próxima dos ciclos de decisão do escalonador, e os perfis de geração
 tendem a apresentar mudanças graduais com a passagem do tempo. Ao fim desse procedimento, são gerados arquivos de traços para cada um
 desses três países, com uma amostra de intensidade de carbono e uma de água em intervalos de 15 minutos, no formato de atualizações
@@ -220,25 +220,76 @@ caso contrário. Os fatores hídricos, por sua vez, cobrem apenas o consumo oper
 retirados de \textcite{water-macknick-2012}. Em uma determinada execução do experimento, todos os hosts do SimGrid
 herdam as intensidades ambientais do país em questão para tal execução.
 
-Uma parte significativa dos tipos de produção possui diferentes valores
-de intensidade ambiental, seja carbono ou água, para tecnologias diferentes de resfriamento, por exemplo. Assim, boa parte dos valores
-finais utilizados neste trabalho são as médias de intensidade para um mesmo tipo de produção. O trabalho assume que os fatores permanecem invariáveis para diferentes plantas de 
+ O trabalho assume que os fatores permanecem invariáveis para diferentes plantas de 
 geração de energia, entre diferentes países e anos visto que a plataforma da ENTSO-E não publica as características
 no nível da usina de produção de energia que uma atribuição mais detalhada fosse requisitar. Como o escalonador reage
-simplesmente à variação entre as intensidades de diferentes instantes no tempo, invés de realizar uma comparação com níveis
-absolutos já registados, essa simplficação pesa menos do que pesaria numa contabilidade absoluta, pois essa mudança afeta
+simplesmente à variação entre as intensidades de diferentes instantes no tempo, em vez de de realizar uma comparação com níveis
+absolutos já registrados, essa simplificação pesa menos do que pesaria numa contabilidade absoluta, pois essa mudança afeta
 o nível da série, não a sua forma. Por outro lado, a escolha dos fatores é tratada como eixo de sensibilidade na Subseção
 \ref{subsec:sensibilidade-hidrica}, observado que a mudança na razão entre fatores de tipos de produção diferentes
 altera a própria forma da série.
 
-Os países dos quais extraímos os dados dos sinais ambientais para este trabalho são França, Alemanha e Polônia, extraídos
-da mesma origem, compreendendo o período entre 2018 e 2025 e o mesmo fuso horário (CET/CEST). A composição das matrizes elétricas desses países
-varia bastante, com a Polônia sendo dominada por uma matriz mais suja, com alta dependência de termelétricas, enquanto a França
-possui um parque gerador considerado verde, com dominância da geração por fissão nuclear. A Alemanha, por sua vez, apresenta uma matriz 
+\begin{table}[htb]
+  \centering
+  \begin{threeparttable}
+    \caption{Fatores de intensidade atribuídos a cada tipo de produção da ENTSO-E.}
+    \label{tab:fatores-intensidade}
+    \small
+    \begin{tabular}{@{}llrr@{}}
+      \toprule
+      Tipo de produção (ENTSO-E) & Base do fator & $\mathrm{gCO_{2}eq/kWh}$ & $\mathrm{L/kWh}$ \\
+      \midrule
+      \textit{Fossil Brown coal/Lignite}       & carvão pulverizado\tnote{a}  & 1000 & 1,802 \\
+      \textit{Fossil Hard coal}                & carvão, média\tnote{b}       & 630  & 1,802 \\
+      \textit{Fossil Coal-derived gas}         & carvão, média\tnote{c}       & 630  & 1,802 \\
+      \textit{Fossil Gas}                      & gás, média\tnote{b}          & 280  & 1,086 \\
+      \textit{Fossil Oil}                      & gás, média\tnote{d}          & 280  & 1,086 \\
+      \textit{Other}                           & gás, média\tnote{e}          & 280  & 1,086 \\
+      \textit{Nuclear}                         & nuclear                      & 5,1  & 1,957 \\
+      \textit{Hydro Water Reservoir}           & hidrelétrica\tnote{f}        & 81   & 17,0  \\
+      \textit{Hydro Run-of-river and poundage} & hidrelétrica\tnote{f}        & 81   & 17,0  \\
+      \textit{Biomass}                         & biomassa\tnote{g}            & 230  & 1,147 \\
+      \textit{Waste}                           & biomassa\tnote{h}            & 230  & 1,147 \\
+      \textit{Other renewable}                 & biomassa\tnote{i}            & 230  & 1,147 \\
+      \textit{Geothermal}                      & geotérmica\tnote{g}          & 38   & 0,950 \\
+      \textit{Solar}                           & fotovoltaica, média          & 21   & 0,004 \\
+      \textit{Wind Offshore}                   & eólica marítima, média       & 13   & 0     \\
+      \textit{Wind Onshore}                    & eólica terrestre             & 12   & 0     \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}\footnotesize
+      \item Carbono: estimativas de ciclo de vida da \textcite{unece-carbon}, com valores do
+        \textcite{carbon-ipcc-2014} para as tecnologias que ela não cobre. Água: consumo
+        operacional, de \textcite{water-macknick-2012}. Onde a fonte lista variantes de uma mesma
+        tecnologia, o fator é a média aritmética delas: para carbono, variantes de usina; para água,
+        variantes de tecnologia e de resfriamento. Os tipos \textit{Energy storage} e
+        \textit{Hydro Pumped Storage} não recebem fator, por serem excluídos da composição.
+      \item[a] Sem entrada para lignito; adota-se o maior valor de carvão disponível, pois o lignito
+        emite mais que a hulha.
+      \item[b] As médias de carvão e de gás incluem variantes com captura de carbono, o que reduz o
+        valor adotado. O efeito sobre o nível da série é examinado na
+        Subseção~\ref{subsec:conferencia-externa-carbono}.
+      \item[c] Gases de alto-forno e de coqueria, subprodutos do carvão.
+      \item[d] Sem entrada para óleo; adota-se o combustível fóssil mais próximo.
+      \item[e] Categoria não classificada pela plataforma, majoritariamente geração fóssil
+        industrial.
+      \item[f] Carbono: média das usinas de grande e de médio porte. Água: a fonte reporta um único
+        valor para hidrelétricas, atribuído tanto ao reservatório quanto ao fio d'água.
+      \item[g] Valor do \textcite{carbon-ipcc-2014}, sem entrada correspondente na UNECE.
+      \item[h] Incineração de resíduos, comparável a usinas térmicas a biomassa.
+      \item[i] Majoritariamente biogás e pequenas usinas a biomassa.
+    \end{tablenotes}
+  \end{threeparttable}
+\end{table}
+
+Os sinais ambientais extraídos para este trabalho correspondem a França, Alemanha e Polônia, escolhidos por oferecerem contrastes aparentes
+a partir da mesma origem, do mesmo período e do mesmo fuso horário (CET/CEST). As composições dos parques geradores desses países
+diferem substancialmente, observado que enquanto 70\% da geração de energia elétrica na Polônia proveio do carvão no período analisado,
+70\% da geração francesa proveio da fissão nuclear. A Alemanha, por sua vez, apresenta uma matriz 
 mista, com uma boa representação de fontes sustentáveis como eólica e solar durante o dia em períodos favoráveis, mas também
 uma alta queima de combustíveis fósseis para suprir quando as fontes sustentáveis não estão disponíveis. Ao se comparar os valores de intensidade
-ambiental entre esses países nota-se que o contraste entre os perfis de geração não é unidimensional. Comparando os 
-valores da médias aritméticas das amostras de 15 minutos, é possível observar cenários contrastantes. Enquanto a França possui a menor
+ambiental entre esses países nota-se que o contraste entre os perfis de geração não é unidimensional. Comparando as médias 
+aritméticas das amostras de 15 minutos, é possível observar cenários contrastantes quanto as duas intensidades ambientais. Enquanto a França possui a menor
 intensidade de carbono em média ($36.4 gCO_{2}eq/kWh$) e a maior de água ($3.320 L/kWh$), a Polônia
 possui a maior intensidade de carbono ($569.4 gCO_{2}eq/kWh$) e uma intensidade hídrica ($1.587 L/kWh$) 
 bem próxima a da Alemanha ($1.522 L/kWh$), a menor dentre os três países. É esse contraste entre as intensidades de carbono
