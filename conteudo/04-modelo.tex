@@ -115,7 +115,7 @@ e não apenas quanto à energia consumida.
 
 As equações acima contém quatro parâmetros operacionais que são configuráveis por
 host do SimGrid. Esses parâmetros são: o PUE, que não tem dimensão; 
-a intensidade de carbono $I_{C}$, que é medida em $kgCO_{2}eq/kWh$; a intensidade hídrica $I_{W}$, que é medida em $L/kWh$; 
+a intensidade de carbono $I_{C}$, que é medida em $gCO_{2}eq/kWh$; a intensidade hídrica $I_{W}$, que é medida em $L/kWh$; 
 e o WUE, que é medido em $L/kWh$. Como a configuração desses parêmtros é feita por host, e não
 por plataforma ou simulação, é possível que hosts de zonas distintas recebam sinais de matrizes
 elétricas distintas, ou que hosts de uma mesma zona recebam fatores de instalação distintos. Assim,
@@ -129,8 +129,9 @@ por host e a execução dos jobs. Nessa ligação se realizam as duas primeiras 
 anunciadas ao fim do \hyperref[sec:simulacao-rjms]{Capítulo 2}. A primeira dessas extensões
 é o consumo de sinais ambientais externos ao longo do tempo de execução da simulação, 
 onde o simulador reproduz atualizações datadas de intensidade de carbono, intensidade hídrica,
-PUE e WUE para todos os hosts em uma zona do SimGrid. Dessa forma, os quatro parâmetros
-operacionais acompanham as séries derivadas na \hyperref[sec:derivacao-sinais]{Seção 5.2}.
+PUE e WUE para todos os hosts em uma zona do SimGrid. Dessa forma, as intensidades de carbono e água acompanham 
+as séries descritas na \hyperref[sec:derivacao-sinais]{Seção 5.2}, enquanto o PUE e WUE, que utilizam do mesmo 
+mecanismo, são mantidos neutros durante a campanha descrita pela \hyperref[sec:ambiente-experimental-comum]{Seção 5.3}.
 A segunda extensão é a contabilização da pegada ambiental por job, onde como descrito anteriormente,
 a pegada ambiental de um job é registrada através da diferença entre os acumulados
 operacionais de cada host alocado ao job no instante de término e no instante
@@ -159,69 +160,89 @@ um novo parâmetro operacional.
 \section{Derivação dos sinais ambientais}
 \label{sec:derivacao-sinais}
 
-A plataforma de transparência da \emph{ENTSO-E}~\citep{entsoe-platform} (\textit{European Network of
-Transmission System Operators for Electricity}), que foi estabelecida a partir da 
-Regulação N. 543/2013~\citep{eu-regulation-543-2013}, tem como objetivo principal reduzir o uso de informação privilegiada
-e nivelar as condições de competição entre geradores, varejistas e negociantes do 
-mercado de energia elétrica da Europa. Os dados de geração, transmissão, carga, balanceamento
-são fornecidos para a plataforma pelos Operadores dos Sistemas de Transmissão (\textit{Transmission 
-System Operators}, ou TSOs) e pelos geradores de energia, geralmente por intermédio de
-provedores de dados intermediários. 
+A plataforma de transparência da ENTSOE-E ~\citep{entsoe-platform} (\textit{European Network of
+Transmission System Operators for Electricity}), que foi estabelecida a partir do
+Regulamento (UE) n. º 543/2013~\citep{eu-regulation-543-2013}, busca reduzir o uso de informação privilegiada
+e nivelar as condições de competição entre geradores, varejistas e comercializadores do 
+mercado de energia elétrica da Europa. Os registros de geração, transmissão, carga e balanceamento
+chegam à plataforma através dos operadores dos sistemas de transmissão (\textit{Transmission 
+System Operators}, TSOs), que também atuam como provedores, e por outros detentores de dados de energia, em geral 
+por intermédio de provedores de dados intermediários. 
 
-Os sinais ambientais são derivados dos dados obtidos
-dessa plataforma, por três motivos principais. O primeiro é que a plataforma disponibiliza
-os dados de geração real por tipo de produção, que é justamente o nível de detalhe necessário
-para compor a matriz elétrica de uma região. Além disso, esses dados possuem uma resolução sub-horária,
-com granularidades de até 15 minutos para certas regiões como a Alemanha ou a Áustria, 
+A plataforma foi escolhida como fonte dos sinais ambientais por três propriedades. A primeira é que ela disponibiliza
+os dados de geração efetiva por tipo de produção, o nível de agregação em que se compõe 
+a matriz elétrica de um país. A segunda é a resolução temporal, que acompanha a unidade de tempo de mercado de cada operador, 
+com intervalos de amostragem chegando a 15 minutos para certos países como a Alemanha ou a Áustria, 
 granularidade essa fina o suficiente para acompanhar a variação durante a execução de um mesmo job.
-Por fim, os dados são reportados na mesma estrutura para regiões geográficas distintas, dispensando
-harmonização adicional entre diferentes regiões. \textcite{entsoe-limitations} documentam lacunas de cobertura
-entre diferentes países e tecnologia, além da ausência de revisões subsequentes nos dados em relação a outras fontes, 
-Porém, essas questões não se mostraram empecilhos para o uso da plataforma no contexto deste trabalho.   
+A terceira é a uniformidade, pois todos os países publicam os valores na mesma estrutura e nomenclatura de tipos de produção, 
+o que permite que as três séries sejam derivadas através de um único procedimento. A base, contudo, tem limitações conhecidas. 
+Para os seus primeiros anos de operação, \textcite{entsoe-limitations} documentam lacunas de cobertura
+entre diferentes países e tecnologias, inconsistências na classificação de usinas por tipo de produção e alguns desvios persistentes
+nos dados quando comparados às estatísticas oficiais, motivados pela ausência de revisões posteriores nos dados que são publicados na
+base próximo do tempo real. Por consequência, apesar da necessidade de uma verificação mais detalhada caso o objetivo seja uma contabilidade oficial,
+a plataforma se mostra adqueada para acompanhar a variação e estimar a composição das matrizes elétricas dos países
+europeus.  
 
-Os dados brutos obtidos da plataforma da ENTSO-E passam por uma etapa de limpeza antes de serem
-transformados nos arquivos de traços. Fontes de armazenamento são excluídas da composição das matrizes
-visto que a composição das fontes de geração que fornecem energia para carregar o sistema de armazenamento,
-atribuição temporal e as perdas de \textit{round-trip} não são representadas na plataforma. Fontes de geração
-que não reportam geração positiva em nenhum momento também são excluídas. Valores líquidos remanescentes
-podem ficar negativos, o que distorceria a média ponderada, e por isso são truncados para 0. Além disso,
-observa-se que o total de geração de uma certa região nunca cai para abaixo de 35\% da mediana da região, então qualquer
-instante de tempo que reporte um total abaixo de 20\% é tratado como dado ausente e interpolado. Algumas regiões
-possuem dados de geração na granularidade de 15 minutos, enquanto outras possuem dados com granularidade horária.
-Como a granularidade de 15 minutos está mais próxima dos ciclos de decisão do escalonador, e a composição das
-matrizes tendem a possuir mudanças graduais com a passagem do tempo, pontos de 15 minutos entre horas
-são preenchidos a partir de interpolação linear.  
+Os valores brutos, de 2018 a 2025, passam por uma etapa de limpeza antes de serem
+transformados nos arquivos de traços consumidos pelo simulador. Fontes de armazenamento (baterias e hidrelétricas reversíveis) 
+são excluídas da participação nas matrizes uma vez que a plataforma não identifica a origem dos tipos de produção que as carregou,
+o momentos em que ela foi gerada nem as perdas de \textit{round-trip}. Também são descartados os tipos de produção
+que não informam geração positiva em nenhum momento no período. Como os valores são líquidos, ou seja, a plataforma 
+informa a diferença de cada tipo descontado pelo consumo de energia, alguns valores remanescentes
+podem ficar negativos \footnote{Na França, por exemplo, o valor líquido da hulha é negativo em cerca de um terço do período considerado}, 
+o que distorceria a média ponderada, e por isso são truncados para 0. Valores ausentes de um tipo válido também são tratados 
+como produção nula. Além disso, observa-se que o total de geração de um certa país nunca cai para abaixo de 
+35\% da mediana do país, de modo que qualquer instante de tempo que registre um total abaixo de 20\% 
+é tratado como dado ausente e consequentemente preenchido por interpolação. A Alemanha
+publica registros de energia gerada na granularidade de 15 minutos, enquanto a França e a Polônia apresentam registros com granularidade horária.
+Todas as séries são reamostradas para uma grade comum com resolução de 15 minutos, com os pontos intermediários das séries 
+horários sendo preenchidos a partir de interpolação linear. Isso é justificado pelo fato de que a resolução temporal de 15 
+minutos está mais próxima dos ciclos de decisão do escalonador, e os perfis de geração
+tendem a apresentar mudanças graduais com a passagem do tempo. Ao fim desse procedimento, são gerados arquivos de traços para cada um
+desses três países, com uma amostra de intensidade de carbono e uma de água em intervalos de 15 minutos, no formato de atualizações
+datadas reprodutível pelo Batsim.
 
-A intensidade ambiental de um sinal $e$, com $e$ podendo ser carbono ou água, é a média dos
-fatores ponderada pela geração instantânea, dada pela equação
+A intensidade ambiental de um sinal $e \in \{C, W\}$, de carbono ou de água, é a média dos fatores ponderada pela geração instantânea, 
+dada pela equação
 
 \begin{equation*}
     I_{e,c}(t) = \frac{\sum_{s}G_{c,s}(t)f_{e,s}}{\sum_{s}G_{c,s}(t)}
     \label{eq:intensidade-ambiental-pais}
 \end{equation*}
 
-onde $c$ indica o país, $s$ a fonte de produção, $G_{c,s}(t)$ a geração em MW, e $f_{e,s}$ 
-é um fator fixado da fonte de produção, expresso em $gCO_{2}eq/kWh$ para carbono e $L/kWh$ para
-água. Como mencionado no \hyperref[sec:pegadas-em-computacao]{Capítulo 2}, esses fatores fixados indicam
-a quantidade de impacto ambiental resultante da geração de uma certa quantidade de energia elétrica.
-Os fatores de carbono são estimativas que compreendem todo o ciclo de vida de uma certa
-fonte de produção, retirados diretamente da avaliação da \textcite{unece-carbon} quando disponível ou do \textcite{carbon-ipcc-2014}
-caso contrário. Os fatores de água são as médias do consumo operacional de água por uma determinada fonte de produção,
-retirados de \textcite{water-macknick-2012}. O trabalho assume que os fatores permanecem fixos para diferentes plantas de 
-geração de energia, entre diferentes países e anos visto que a plataforma da ENTSO-E não reporta as características
-no nível da usina de geração de energia que uma atribuição mais detalhada fosse requisitar. Como o escalonador reage
+em que $c$ indica o país, $s$ o tipo de produção, $G_{c,s}(t)$ é a energia gerada através do tipo de produção $s$ em MW, e $f_{e,s}$ 
+é um fator constante associado a esse tipo, expresso em $gCO_{2}eq/kWh$ para carbono e $L/kWh$ para
+água. Conforme o \hyperref[sec:pegadas-em-computacao]{Capítulo 2}, esses fatores constantes expressam
+o impacto ambiental associado à geração de uma unidade de energia elétrica através daquele tipo de produção.
+Os fatores de carbono são estimativas que compreendem todo o ciclo de vida de um certo
+tipo de produção, retirados de um compilado entre a avaliação da \textcite{unece-carbon} quando disponível ou do \textcite{carbon-ipcc-2014}
+caso contrário. Os fatores hídricos, por sua vez, cobrem apenas o consumo operacional de água por um determinado tipo de produção,
+retirados de \textcite{water-macknick-2012}. Em uma determinada execução do experimento, todos os hosts do SimGrid
+herdam as intensidades ambientais do país em questão para tal execução.
+
+Uma parte significativa dos tipos de produção possui diferentes valores
+de intensidade ambiental, seja carbono ou água, para tecnologias diferentes de resfriamento, por exemplo. Assim, boa parte dos valores
+finais utilizados neste trabalho são as médias de intensidade para um mesmo tipo de produção. O trabalho assume que os fatores permanecem invariáveis para diferentes plantas de 
+geração de energia, entre diferentes países e anos visto que a plataforma da ENTSO-E não publica as características
+no nível da usina de produção de energia que uma atribuição mais detalhada fosse requisitar. Como o escalonador reage
 simplesmente à variação entre as intensidades de diferentes instantes no tempo, invés de realizar uma comparação com níveis
-absolutos já registados, essa simplficação pesa menos do que pesaria numa contabilidade absoluta, por exemplo. 
+absolutos já registados, essa simplficação pesa menos do que pesaria numa contabilidade absoluta, pois essa mudança afeta
+o nível da série, não a sua forma. Por outro lado, a escolha dos fatores é tratada como eixo de sensibilidade na Subseção
+\ref{subsec:sensibilidade-hidrica}, observado que a mudança na razão entre fatores de tipos de produção diferentes
+altera a própria forma da série.
 
 Os países dos quais extraímos os dados dos sinais ambientais para este trabalho são França, Alemanha e Polônia, extraídos
-da mesma fonte e a partir do mesmo período, com os fusos alinhados posteriormente. A composição das matrizes elétricas desses países
+da mesma origem, compreendendo o período entre 2018 e 2025 e o mesmo fuso horário (CET/CEST). A composição das matrizes elétricas desses países
 varia bastante, com a Polônia sendo dominada por uma matriz mais suja, com alta dependência de termelétricas, enquanto a França
-possui uma matriz considerada verde, com dominância da geração por fusão nuclear. Por fim, a Alemanha apresenta uma matriz 
+possui um parque gerador considerado verde, com dominância da geração por fissão nuclear. A Alemanha, por sua vez, apresenta uma matriz 
 mista, com uma boa representação de fontes sustentáveis como eólica e solar durante o dia em períodos favoráveis, mas também
 uma alta queima de combustíveis fósseis para suprir quando as fontes sustentáveis não estão disponíveis. Ao se comparar os valores de intensidade
-ambiental entre esses países nota-se que o contraste entre as matrizes não é unidimensional. Enquanto a França possui a menor
-intensidade de carbono em média ($36.4 gCO_{2}eq/kWh$) e a maior intensidade hídrica em média ($3.320 L/kWh$), a Polônia
-possui a maior intensidade de carbono em média ($569.4 gCO_{2}eq/kWh$) e a menor intensidade hídrica em média ($1.587 L/kWh$).
+ambiental entre esses países nota-se que o contraste entre os perfis de geração não é unidimensional. Comparando os 
+valores da médias aritméticas das amostras de 15 minutos, é possível observar cenários contrastantes. Enquanto a França possui a menor
+intensidade de carbono em média ($36.4 gCO_{2}eq/kWh$) e a maior de água ($3.320 L/kWh$), a Polônia
+possui a maior intensidade de carbono ($569.4 gCO_{2}eq/kWh$) e uma intensidade hídrica ($1.587 L/kWh$) 
+bem próxima a da Alemanha ($1.522 L/kWh$), a menor dentre os três países. É esse contraste entre as intensidades de carbono
+e de água entre os diferentes países que justifica acompanhar as pegadas separadamente.
 
 \section{Ambiente experimental comum}
 \label{sec:ambiente-experimental-comum}
@@ -235,9 +256,10 @@ As janelas ambientais desse experimento em comum cobrem a sazonalidade dos fator
 dos três países citados na seção anterior contribui com 12 janelas de 28 dias cada, com três janelas aleatórias para cada
 estação sorteadas sob uma semente de \emph{RNG} (do ingles \textit{Random Number Generator}, ou Gerador de Números Aleatórios)
 fixa. Dessa forma, a amostra cobre toda a variação sazonal dos sinais da rede e o sorteio é reprodutível para rodadas 
-posteriores. A duração de 28 dias abrange quatro ciclo semanais completos, começando sempre na segunda-feira às 0h, o que
-confere peso igual aos padrões de intensidade de dias úteis e de fim de semana. Dessa forma, nenhuma conclusão obtida
-das políticas posteriores depende de ter caído especificamente numa estação e período de tempo favorável.
+posteriores. A duração de 28 dias abrange quatro ciclo semanais completos, começando sempre na segunda-feira às 0h no horário local
+de cada país, o que confere peso igual aos padrões de intensidade de dias úteis e de fim de semana. Dessa 
+forma, nenhuma conclusão obtida das políticas posteriores depende de ter caído especificamente numa 
+estação e período de tempo favorável.
 
 Os extratos de carga de trabalho foram extraídos a partir de dois sistemas de diferentes escalas presentes no \textit{Los Alamos National Laboratory}
 (\cite{lanl}). O primeiro sistema foi o \textit{cluster LANL Mustang}, um cluster de HPC que funcionou entre 2011 e 2016, 
@@ -324,7 +346,7 @@ uma referência independente, buscando entender se os níveis e padrões observa
 mantinham. A conferência foi realizada contra o \textit{Yearly Electricity Data} do \textit{Ember}, que é 
 um instituto independente de pesquisa em energia. Esse instituto publica dados das intensidades nacionais anuais
 de geração e emissão de $CO_{2}$, a partir da compilação de diversas fontes nacionais e multinacionais. Tal escolha é justificada
-pelo fato de que esse conjunto de dados é a correspondência pública mais próxima do modelo desta dissertação, visto que ambas
+pelo fato de que esse conjunto de dados é a correspondência pública mais próxima do modelo desta dissertação, já que ambas
 utilizam emissões de $CO_{2}$ nacionais considerando todo o ciclo de vida e baseadas na produção de energia. 
 
 Comparando os dados do Ember entre 2018 e 2024 
