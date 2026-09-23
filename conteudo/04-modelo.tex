@@ -98,7 +98,7 @@ discreta é equivalente a integral apresentada na \hyperref[eq:pegada]{Equação
 A variação dos sinais ambientais ocorre em uma janela de tempo menor do que a duração de jobs
 maiores, de modo que um job atravessa diversos valores de intensidade ao longo da sua
 execução. Considerando um traço com intensidade variando em janelas de 15 minutos, um job com 
-6 horas de execução atravessaria 24 janelas de intensidades diferentes. Como mencionando anteriormente,
+seis horas de execução atravessaria 24 janelas de intensidades diferentes. Como mencionando anteriormente,
 uma política de escalonamento ambientalmente consciente se importa principalmente com "quando" 
 um job roda.
 
@@ -224,7 +224,7 @@ herdam as intensidades ambientais do país em questão para tal execução.
 geração de energia, entre diferentes países e anos visto que a plataforma da ENTSO-E não publica as características
 no nível da usina de produção de energia que uma atribuição mais detalhada fosse requisitar. Como o escalonador reage
 simplesmente à variação entre as intensidades de diferentes instantes no tempo, em vez de de realizar uma comparação com níveis
-absolutos já registrados, essa simplificação pesa menos do que pesaria numa contabilidade absoluta, pois essa mudança afeta
+absolutos já registrados, essa simplificação pesa menos do que pesaria em uma contabilidade absoluta, pois essa mudança afeta
 o nível da série, não a sua forma. Por outro lado, a escolha dos fatores é tratada como eixo de sensibilidade na Subseção
 \ref{subsec:sensibilidade-hidrica}, observado que a mudança na razão entre fatores de tipos de produção diferentes
 altera a própria forma da série.
@@ -306,95 +306,172 @@ e de água entre os diferentes países que justifica acompanhar as pegadas separ
 \section{Ambiente experimental comum}
 \label{sec:ambiente-experimental-comum}
 
-As campanhas presentes nos capítulos seguintes deste trabalho utilizam a bancada construída neste capítulo como base,
-variando apenas os fatores próprios inerentes a cada uma das políticas testadas. A utilização dessa referência comum
-torna os resultados entre as políticas comparáveis, pois o que muda no final são as decisões tomadas pelo algoritmo
-do escalonador derivado da política, não o ambiente sobre o qual ele roda. 
+As campanhas presentes nos capítulos seguintes deste trabalho utilizam uma bancada experimental comum, 
+construída neste capítulo. Essa bancada compreende o modelo de pegada ambiental, as séries de intensidade, as plataformas simuladas,
+os extratos de carga de trabalho e o protocolo de comparação. O que varia entre as campanhas testadas é tão somente a política de escalonamento
+e seus parâmetros próprios. A utilização dessa referência comum
+torna os resultados entre as políticas comparáveis, pois o que varia entre as execuções são as decisões tomadas pelo algoritmo
+do escalonador derivado da política, não o ambiente em que ele é executado. 
 
-As janelas ambientais desse experimento em comum cobrem a sazonalidade dos fatores ambientais por construção. Cada um
-dos três países citados na seção anterior contribui com 12 janelas de 28 dias cada, com três janelas aleatórias para cada
-estação sorteadas sob uma semente de \emph{RNG} (do ingles \textit{Random Number Generator}, ou Gerador de Números Aleatórios)
-fixa. Dessa forma, a amostra cobre toda a variação sazonal dos sinais da rede e o sorteio é reprodutível para rodadas 
-posteriores. A duração de 28 dias abrange quatro ciclo semanais completos, começando sempre na segunda-feira às 0h no horário local
-de cada país, o que confere peso igual aos padrões de intensidade de dias úteis e de fim de semana. Dessa 
-forma, nenhuma conclusão obtida das políticas posteriores depende de ter caído especificamente numa 
-estação e período de tempo favorável.
+As janelas ambientais desse experimento em comum cobrem a sazonalidade dos sinais ambientais por construção. Cada um
+dos três países citados na seção anterior contribui com 12 janelas de 28 dias cada, com três janelas aleatórias em três anos distintos para cada
+estação sorteadas sob uma semente de RNG (do inglês \textit{Random Number Generator}, ou Gerador de Números Aleatórios)
+fixa\footnote{Semente 20180101}. Cada país tem o seu sorteio realizado de forma separada, de forma que as janelas de um país
+não são necessariamente iguais as janelas dos outros. Dessa forma, o conjunto sorteado cobre as quatro estações por construção e o sorteio é reprodutível em execuções 
+posteriores. A duração de 28 dias abrange quatro ciclos semanais completos, começando sempre na segunda-feira às 00:00 no horário local
+de cada país, de modo que cada dia da semana aparece o mesmo número de vezes na janela. Com isso, nenhuma conclusão 
+obtida das políticas posteriores depende de ter caído numa estação e período de tempo favorável.
 
-Os extratos de carga de trabalho foram extraídos a partir de dois sistemas de diferentes escalas presentes no \textit{Los Alamos National Laboratory}
-(\cite{lanl}). O primeiro sistema foi o \textit{cluster LANL Mustang}, um cluster de HPC que funcionou entre 2011 e 2016, 
-com foco em \textit{capactiy computing}, ou seja, um sistema cujo foco está na produtividade coletiva, 
-apresentando um bom custo benefício e recursos computacionais de propósito geral, visando assim atender um grande número 
-de usuários com uma alta vazão. O segundo sistema foi o supercomputador \textit{LANL Trinity}, sistema usado para \textit{capability
-computing}, ou seja, um sistema cujo foco é a computação de ponta de fato, focado em resolver problemas grandes e complexos
-da forma mais rápida e eficiente possível. Os traços de cargas de trabalho desses sistemas foram extraídos a partir dos datasets
-fornecidos por \textcite{atlas-lanl}, contendo os dados de toda execução do \textit{Mustang} e os dados de execução entre Fevereiro
-e Abril de 2017 do \textit{Trinity}, período em que o sistema estava operando sobre modo de \textit{OpenScience}.
+Os extratos de carga de trabalho provêm de dois sistemas de diferentes escalas presentes no Los Alamos National Laboratory
+\citep{lanl}. O primeiro sistema foi o cluster LANL Mustang, um cluster de HPC que funcionou entre 
+2011 e 2016, com foco em \textit{capacity computing}, ou seja, um sistema que prioriza a produtividade coletiva, 
+com boa relação custo-benefício e recursos computacionais de propósito geral, visando assim atender um grande número 
+de usuários com uma alta vazão. O segundo sistema foi o supercomputador LANL Trinity, sistema usado para \textit{capability
+computing}, ou seja, um sistema destinado a computação de ponta, orientado a resolver problemas grandes e complexos
+da forma mais rápida e eficiente possível. Devido aos seus diferentes objetivos, esses dois sistemas representam diferentes escalas:
+o Mustang consistia de 1600 nós, totalizando 38400 processadores e 102TB RAM, enquanto o Trinity consistia de 9048 nós, totalizando
+301056 processadores e 1.2PB RAM. Os traços de cargas de trabalho desses sistemas foram obtidos dos conjuntos de dados
+publicados por \textcite{atlas-lanl}, contendo os dados de toda execução do Mustang e os dados de execução entre fevereiro
+e abril de 2017 do Trinity, período em que o sistema estava operando sob o regime de ciência aberta 
+(\textit{OpenScience}). Os jobs cuja quantidade
+de nós requisitados ultrapassa a capacidade dos sistemas são descartados dos traços, assim como jobs sem início registrado
+\footnote{Foram descartados 5,8\% dos jobs do Mustang e 14,9\% dos jobs do Trinity.}.
 
-Os extratos então são escolhidos a partir de procedimento automatizado sobre o traço completo de cada um desses sistemas.
-As janelas candidatas são todas as janelas de 4 semanas de duração, começando numa segunda-feira às 00:00 UTC e deslocadas
-de uma em uma semana. Cada uma dessas janelas é descrita a partir de métricas normalizadas pela quantidade de nós do sistema
-em específico, de modo que os limiares valem para ambos. Dado que as heurísticas serão comparadas contra o EASY backfilling,
-é importante que a janela escolhida de fato possibilite o backfilling dos jobs, além de não ser dominada por um possível
-evento atípico. A partir disso, se define uma janela candidata como viável caso: (i) no máximo 5\% das horas totais possuem 
-utilização abaixo de 20\%, e durante toda a janela não existe nenhum trecho com tal utilização por mais que 6 horas seguidasm
-o que exclui possíveis drenos e manuteções; (ii) nenhum usuário é reponsável por mais de metada das submissões de jobs; (iii) 
-jobs largos, ocupando pelo menos 10\% dos nós totais do sistema, representam somados pelo menos 20\% do tempo total 
-ocupado pelos nós, para que o sistema de fato possua reservas; (iv) jobs estreitos e curtos, ocupando no máximo 1\% dos
-nós do sistema e com no máximo 2h, representam pelo 30\% dos jobs, para que de fato exista o que encaixar com o backfilling.
+Os extratos são escolhidos a partir de um procedimento automatizado sobre o traço completo de cada um desses sistemas.
+Os extratos candidatos são todas as recortes de 4 semanas de duração, começando numa segunda-feira às 00:00 UTC e deslocados
+de uma em uma semana. Cada um desses candidatos é descrito a partir de métricas normalizadas pela quantidade de nós do sistema
+em específico, de modo que valham para os dois sistemas. Como as políticas serão comparadas ao EASY backfilling,
+o extrato escolhido precisa possibilitar o \textit{backfilling} dos jobs, além de não ser dominado por um 
+evento atípico. Por isso, um candidato é considerado como viável caso: (i) no máximo 5\% das horas totais tenham 
+utilização abaixo de 20\%, e durante todo extrato não exista nenhum trecho com tal utilização por mais que seis horas seguidas,
+o que exclui esvaziamentos programados e manutenções; (ii) nenhum usuário seja responsável por mais de metade das submissões de jobs; (iii) 
+jobs largos, ocupando pelo menos 10\% dos nós totais do sistema, somem ao menos 20\% dos nós-segundos (produto entre os nós alocados
+e o tempo de execução), para que o sistema de fato possua reservas; (iv) jobs estreitos e curtos, ocupando no máximo 1\% dos
+nós do sistema e com no máximo 2~h, representem ao menos 30\% dos jobs, para que de fato exista o que encaixar com o \textit{backfilling}.
 
-Entre as janelas viáveis disponíves, são selecionadas duas, visando o exercício de dois regimes de cargas de trabalho. 
-O primeiro regime é um regime \textit{slack}, onde o sistema está ocupado mas não saturado, o que o torna aparente
-quanto ao deslocamento temporal dos jobs. Para se configurar como uma janela pertecente a esse regime, a utilização dos nós deve estar entre 50\% e 90\%, e no máximo 30\% de horas saturadas no total, onde uma
-hora é definida como saturada por ter mais de 95\% dos seus nós utilizados. O segundo regime é um regime estressado, onde o sistema
-está altamente saturado, o que aumenta a importância do backfilling. Uma janela deve possuir entre 30\% e 50\% de 
-suas horas saturadas e utilização média de até 95\% para ser caracterizada como saturada. Em cada um desses regimes, as janelas
-viáveis são ordenados a partir da soma de dois índices padronizados, com a de maior soma sendo escolhida. Para o regime
+Entre os extratos viáveis disponíveis, selecionam-se dois por sistema, um por regime, visando o exercício de dois regimes de cargas de trabalho. 
+O primeiro regime é um regime \textit{slack}, no qual o sistema está ocupado mas não saturado, o que o torna propício
+quanto ao deslocamento temporal dos jobs. Para se configurar como um viável pertencente a esse regime, a utilização média dos 
+nós no extrato deve estar entre 50\% e 90\%, e no máximo 30\% de horas saturadas no total, sendo que uma
+hora é definida como saturada ao ter pelo menos 95\% dos seus nós ocupados. O segundo regime é um regime \textit{stress}, no qual o sistema
+está altamente saturado, o que aumenta a importância do \textit{backfilling}. Uma extrato deve possuir entre 30\% e 50\% de 
+suas horas saturadas e utilização média de até 95\% para exercer esse regime. Em cada um desses regimes, os viáveis são ordenados a partir da soma de 
+dois índices padronizados, e escolhe-se o de maior soma. Para o regime
 \textit{slack}, soma-se o tamanho médio da fila com o desvio padrão da utilização, sendo que a segunda métrica favorece 
-uma utilização oscilante, deixando espaço para os jobs serem deslocados. Para o regime estressado, soma-se o tamanho médio da fila
-com a fração de horas saturadasm, com a segunda métrica exercendo uma pressão contínua sobre o sistema. 
-Para ambos os casos, uma fila média maior favorece janelas com demanda sustentada.  
+uma utilização oscilante, deixando espaço para os jobs serem deslocados. Para o regime \textit{stress}, soma-se o tamanho médio da fila
+com a fração de horas saturadas, com a segunda métrica favorecendo recortes sob pressão contínua sobre o sistema. 
+Para ambos os casos, uma fila média maior favorece extratos com demanda sustentada. Nenhum dos extratos viáveis do Trinity
+atinge os requisitos do regime \textit{stress}, o que motiva a escolha do extrato mais pressionado entre eles, cujo qual tem uma
+alta sobreposição com o extrato do \textit{slack}.
 
-As datas entre os traços de sinais ambientais e os traços de carga de trabalho não se alinham, pois os sinais se referem a dados
-entre 2018 e 2025, enquanto as cargas de trabalho entre 2011 e 2017. Esse desalinhamento é aceito por construção, justificado pelo fato
-de que o objeto de estudo é a comparação de diferentes políticas de escalonamento a um sinal ambiental com uma estrutura temporal
-e sazonal, e não especificamente exatamente o que estava acontencendo no sistema específico quando a carga foi gerada. Jobs que já estavam
-rodando ou aguardando na fila no momento de início do extrato $T_{0}$ são submetidos novamente em $t = 0$ para o escalonador.
-Os jobs que já estavam em execução entram no instante inicial com o tempo de execução e walltime resultantes, na mesma ordem
+\begin{table}[htb]
+  \centering
+  \begin{threeparttable}
+    \caption{Extratos de carga reproduzidos na campanha.}
+    \label{tab:extratos-carga}
+    \small
+    \begin{tabular}{@{}lrrrr@{}}
+      \toprule
+      & \multicolumn{2}{c}{Mustang (1.600 nós)} & \multicolumn{2}{c}{Trinity (9.408 nós)} \\
+      \cmidrule(lr){2-3} \cmidrule(l){4-5}
+      & \textit{slack} & \textit{stress} & \textit{slack} & \textit{stress}\tnote{a} \\
+      \midrule
+      \multicolumn{5}{@{}l}{\textit{Seleção}\tnote{b}} \\
+      Início (segunda, 00:00 UTC)         & 13/04/2015 & 07/01/2013 & 29/02/2016 & 22/02/2016 \\
+      Janelas viáveis / candidatas        & 3 / 259    & 18 / 259   & 5 / 7\tnote{c} & 5 / 7\tnote{c} \\
+      Utilização média                    & 0,856      & 0,919      & 0,617      & 0,626 \\
+      Horas saturadas ($\geq 95\%$)       & 9,8\%      & 48,7\%     & 21,4\%     & 18,0\% \\
+      Horas com utilização $< 20\%$       & 0,6\%      & 0,0\%      & 23,0\%     & 20,1\% \\
+      Fila média (capacidades)            & 3,31       & 3,94       & 2,59       & 2,81 \\
+      \midrule
+      \multicolumn{5}{@{}l}{\textit{Conteúdo}\tnote{d}} \\
+      Jobs reproduzidos                   & 10.683     & 5.089      & 4.622      & 3.537 \\
+      Mediana de \textit{walltime} / runtime       & 3,6        & 10,7       & 19,6       & 20,0 \\
+      \midrule
+      \multicolumn{5}{@{}l}{\textit{Aquecimento em $t = 0$}} \\
+      Jobs em execução + em espera        & 22 + 40    & 14 + 17    & 0 + 0      & 34 + 97 \\
+      Nós ocupados                        & 92\%       & 69\%       & 0\%        & 90\% \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}\footnotesize
+      \item[a] Nenhuma janela do Trinity atinge 30\% de horas saturadas; o extrato é o mais
+        pressionado entre as viáveis e não constitui um regime distinto do \textit{slack}.
+      \item[b] Calculados sobre o traço original, nas quatro semanas do extrato. Todos os
+        extratos satisfazem as restrições de composição (maior usuário, jobs largos e
+        candidatos a backfill).
+      \item[c] Duas candidatas excluídas por sobrepor um artefato de contabilidade
+        (abril de 2016); restrições de baixa utilização não aplicadas, pois o traço tem
+        trechos de até 55~h abaixo de 20\%.
+      \item[d] Calculados sobre a carga gerada para o Batsim, apenas nos jobs submetidos
+        dentro das quatro semanas.
+    \end{tablenotes}
+  \end{threeparttable}
+\end{table}
+
+As datas das janelas ambientais e dos extratos de carga de trabalho não se alinham, pois os sinais se referem a dados
+entre 2018 e 2025, enquanto as cargas de trabalho entre 2011 e 2017. Ademais, o mesmo ocorre para as fases diárias, pois as janelas
+começam na segunda 00:00 do horário europeu e os extratos, na segunda 00:00 UTC. A diferença entre o fuso de Los Alamos e UTC é de 
+cinco horas, fazendo que as submissões, que naturalmente se concentram no horário comercial, acabem se concentrando entre 15h e 20h
+UTC, horário que coincide com o tardes e noites europeias. O desalinhamento é deliberado, dado que 
+o objeto de estudo é a resposta de diferentes políticas de escalonamento a um sinal ambiental com uma estrutura temporal
+e sazonal, e não o que ocorria no sistema quando a carga foi registrada. 
+
+O início do extrato no traço original, definido como instante $T_{0}$, corresponde ao instante $t = 0$ da simulação, de modo que
+um jog que foi submetido no instante $T_{0} + \Delta$ no sistema real é submetido no instante $t = \Delta$ da simulação. A janela
+com os sinais ambientais é ancorada no mesmo instante inicial da simulação, ainda que ela se refira a outro período do calendário
+quando comparada com os extratos de carga de trabalho. Jobs que já estavam em execução ou aguardando na fila em $T_{0}$ são 
+submetidos novamente em $t = 0$ para o escalonador. Jobs cancelados enquanto esperavam na fila são excluídos, e a 
+espera acumulada dos restantes é perdida.
+Os jobs que já estavam em execução entram no instante inicial com o tempo de execução e \textit{walltime} restantes, na mesma ordem
 em que haviam começado a executar. Similarmente, jobs que esperavam na fila no momento $T_{0}$ 
-são submetidos ao escalonador em $t = 0$ na mesma ordem em que haviam sido submetidos originalmente.
+são submetidos ao escalonador em $t = 0$ na mesma ordem em que haviam sido submetidos originalmente. O \textit{walltime} entregue ao Batsim
+é a própria estimativa realizada pelo usuário na submissão original do job, podendo ser elevada ao tempo de execução registrado
+em caso de estouro de tempo de execução ou de estimativa ausente originalmente. As superestimações feitas pelos usuários são preservadas,
+com a mediana da razão entre \textit{walltime} pelo tempo de execução variando entre 3,6 e 20 nos extratos utilizados. As métricas de desempenho
+da política consideram apenas os jobs reproduzidos, não os jobs de aquecimento que já estavam rodando no instante $T_{0}$, enquanto
+as pegadas ambientais são totais da plataforma, incluindo ambos.
 
-Como já mencionado, o modelo de job é rígido. Nos traços históricos de carga de trabalho, os jobs possuem informados
-a quantidade de nós requisitados, o walltime e o tempo real de execução no sistema. Cada job é enviado ao Batsim com a mesma 
-quantidade de nós requisitados, modelado com o perfil de tarefa \textit{parallel\_homogeneous}. Nesse perfil, a taxa de progresso 
-de computação continua constante durante a execução do job. Como a taxa é definida pelo produto entre o tempo de execução pela velocidade
-do nó na plataforma, cada job na simulação dura o mesmo tempo de execução que sua contraparte real. A comunicação não 
-foi modelada. 
+O modelo de job é rígido, o que combinado com potência ativa constante resulta na premissa de invariância de que reordernar
+os jobs não muda a energia ativa. Nos traços históricos de carga de trabalho, estão registrados para cada job
+a quantidade de nós requisitados, o \textit{walltime} e o tempo real de execução no sistema. Cada job é submetido ao Batsim com a mesma 
+quantidade de nós requisitados, descrito com o perfil de tarefa \texttt{parallel\_homogeneous}. Nesse perfil, a taxa de progresso 
+de computação permanece constante durante a execução do job. A quantidade de computação definida para cada job é o produto entre
+o seu tempo de execução registrado e a velocidade do nó. Por consequência do nó processar a computação na mesma velocidade definida para 
+o nó, cada job dura na simulação exatamente o mesmo tempo que durou no sistema real. A comunicação não foi modelada. 
 
-Ambas plataformas são modeladas de forma homogênea, com todos nós possuindo a mesma velocidade. Além disso, os nós
-são considerados de núcleo único. Como o perfil de tarefa do Batsim reproduz exatamente o tempo de execução dos jobs,
-as velocidades de processamento \footnote{110,4 Gflop/s para o Mustang e 1177,6 Gflop/s para o Trinity} 
+Ambas as plataformas são modeladas de forma homogênea, com todos nós possuindo a mesma velocidade. Cada um dos nós da plataforma
+é tratado como uma unidade de processamento singular, sem distinção de núcleos, com os jobs alocando nós inteiros. 
+Como o perfil de tarefa do Batsim reproduz exatamente o tempo de execução dos jobs,
+as velocidades de processamento\footnote{110,4 Gflop/s para o Mustang e 1.177,6 Gflop/s para o Trinity.} 
 dos nós são nominais, não afetando nenhum resultado. Os valores de potência ativa foram
-estimados a partir do TDP (\textit{Thermal Design Power}) especificado pelos fabricantes para os processadores dos nós em questão.
-O Mustang, cujos nós são compostos por dois processadores \textit{AMD Opteron 6176} com TDP de 115 W, foi estimado com 320 W, onde os 90 W restantes 
-foram estimados como a potência consumida pela memória e chassi. O Trinity, cujos  nós são compostos por dois processadore
-\textit{Intel Xeon E5-2698 v3} com TDP de 135 W, foi estimado com 270 W, sem considerações quanto a potência consumida
-pela memória ou chassi. As duas plataformadas tiveram seus nós modelados com o consumo de 10 W no estado de potência ocioso. 
-Nenhuma das plataformas possui qualquer modelagem de ligações de rede, rotas de rede ou discos de armazenamento, portanto
+estimados a partir do TDP\footnote{O \textit{Thermal Design
+Power} é uma especificação térmica fornecida pelo fabricante, que indica quanto calor a refrigeração deve dissipar
+sob carga sustentada. Não é medição de consumo e cobre apenas o processador.} dos processadores de cada nó.
+Para o Mustang, cujos nós são compostos por dois processadores \textit{AMD Opteron 6176} com TDP de 115~W, adotou-se $2 \times 115 W + 90 W = 320 W$, 
+dos quais os 90~W restantes 
+foram estimados como a potência consumida pela memória e chassi. Para o Trinity, cujos nós são compostos por dois processadores
+\textit{Intel Xeon E5-2698 v3} com TDP de 135~W, adotou-se 270~W, sem considerações em relação ao consumo de outros componentes.
+pela memória ou chassi. As duas plataformas tiveram seus nós modelados com o consumo de 10~W no estado de potência ocioso.
+Esse consumo equivale ao consumo de um nó desligado, aproximando um mecanismo de desligamento instantâneo e sem custo para o
+modelo. As plataformas não representam enlaces, rotas de rede nem discos de armazenamento, portanto
 a potência consumida por rede e armazenamento pela plataforma no SimGrid é efetivamente zero. 
 
 A bancada experimental não exercita parte do instrumento, e as ausências se distinguem em três naturezas.
-A primeira ausência se dá por um parâmetro presente no modelo, mas neutralizado durante as rodadas experimentais.
-De exemplo, as plataformas não atribuem valor para o PUE, WUE ou pegadas incorporadas dos seus nós. O modelo tem a capacidade
-de acumular a pegada, mas a campanha não usa. A segunda ausência se dá pela falta dos dados necessários. Por exemplo,
-os traços dos jobs não indicam qual o perfil de potência de cada aplicação, o que impossibilita possíveis atuações do escalonador
-quanto a isso. Por fim, a terceira ausência são alavancas não modeladas, que mudariam o objeto de estudo por si.
-Por exemplo, a inclusão de jobs moldáveis destruiria a premissa de invariância, ou a possibilidade de DVFS permitiria
-a modificação da energia ativa, que se mantém constante de propósito.
+A primeira ausência decorre de por um parâmetro presente no modelo, mas neutralizado durante as rodadas experimentais.
+As plataformas não atribuem valor para o PUE, WUE ou pegadas incorporadas dos seus nós, o que resulta no acumulador de água
+no sítio sempre zerado. O modelo de pegada é capaz de acumulá-la, mas a campanha não o faz. A segunda ausência, da falta de dados necessários. Por exemplo,
+os traços dos jobs não indicam qual o perfil de potência de cada aplicação, o que impede o desenvolvimento de políticas que tomem decisões
+de em qual horário ou em quais nós rodar pelo perfil da aplicação. Por fim, a terceira ausência corresponde a alavancas não modeladas, que mudariam o objeto de estudo por si.
+A inclusão de jobs moldáveis destruiria a premissa de invariância. A possibilidade de DVFS permitiria
+a modificação da energia ativa, que se mantém constante de propósito. A migração geográfica de jobs entre sítios de HPC não é modelada
+por duas razões. Primeiro, como ela amplia a decisão de quando para incluir onde executar, ela pressupõe um arranjo organizacional de 
+sítios federados que este trabalho não adota. Segundo, a plataforma não representa o custo de transferência de dados entre sítios,
+sendo que avaliar a transferência geográfica exigiria modelar a movimentação dos dados de entrada e saída. 
 
-As comparações entre as políticas de escalonamento contra o EASY backfilling são feitas de forma pareada, onde 
-se fixa o trio \emph{janela-sistema-extrato} para ambos os lados. Esse mecanismo é justificado pelo fato de que
-a variabilidade da pegada ambiental entre as janelas é maior do que o próprio efeito procurado, o que acaba sendo
-eliminado ao se realizar o pareamento. 
+As comparações entre as políticas de escalonamento contra o EASY backfilling são feitas aos pares, com cada execução de uma
+política sendo comparada à execução do EASY sob a mesma janela, sistema e extrato. O pareamento se justifica pois
+a variabilidade da pegada ambiental entre as janelas é maior do que o efeito procurado, e o pareamento remove essa
+variabilidade da comparação. 
 
 \section{Conferência e sensibilidade do instrumento}
 \label{sec:conferencia-instrumento}
