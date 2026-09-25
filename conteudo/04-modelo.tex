@@ -40,7 +40,7 @@ manutenção.
 
 A contabilidade elementar realizada pelo modelo converte potência em energia, e posteriormente
 energia em pegada ambiental. Considerando um intervalo de tempo $\Delta t$ segundos, um host $h$ em um estado de potência
-consumindo $P$ watts consume uma energia de TI de $E = \frac{P \times \Delta t}{3,6 \times 10^6}$, expressa em kWh.
+consumindo $P$ watts consome uma energia de TI de $E = \frac{P \times \Delta t}{3,6 \times 10^6}$, expressa em kWh.
 A partir da contabilização da energia consumida, o modelo acumula a pegada ambiental em três
 acumuladores operacionais distintos, um para a pegada de carbono, outro para 
 a pegada hídrica no sítio e outro para a pegada hídrica fora do sítio. Além disso, 
@@ -477,42 +477,54 @@ variabilidade da comparação.
 \label{sec:conferencia-instrumento}
 \subsection{Conferência externa da série de carbono}
 \label{subsec:conferencia-externa-carbono}
-O modelo de pegada de carbono derivado dos dados de geração de energia obtidos da ENTSO-E foi conferido contra
-uma referência independente, buscando entender se os níveis e padrões observados para Alemanha, França e Polônia se
-mantinham. A conferência foi realizada contra o \textit{Yearly Electricity Data} do \textit{Ember}, que é 
-um instituto independente de pesquisa em energia. Esse instituto publica dados das intensidades nacionais anuais
-de geração e emissão de $CO_{2}$, a partir da compilação de diversas fontes nacionais e multinacionais. Tal escolha é justificada
-pelo fato de que esse conjunto de dados é a correspondência pública mais próxima do modelo desta dissertação, já que ambas
-utilizam emissões de $CO_{2}$ nacionais considerando todo o ciclo de vida e baseadas na produção de energia. 
+A série de intensidade de carbono derivada dos dados de geração de energia obtidos da ENTSO-E foi conferida contra
+uma referência independente, a fim de avaliar se os níveis e padrões observados para Alemanha, França e Polônia
+são compatíveis com os de uma fonte externa. A conferência foi realizada contra o \textit{Yearly Electricity Data} do Ember \citep{ember-yearly}, que é 
+um instituto independente de pesquisa em energia. Esse instituto publica registros das intensidades nacionais anuais
+de geração e emissão de $\mathrm{CO_{2}eq}$, a partir da compilação de diversas fontes nacionais e multinacionais. Trata-se da 
+referência pública mais próxima da série derivada desta dissertação, já que as duas
+utilizam emissões de $\mathrm{CO_{2}eq}$ nacionais considerando todo o ciclo de vida e baseadas na produção de energia. 
 
-Comparando os dados do Ember entre 2018 e 2024 
-\footnote{O Ember apontava que os dados de 2025 podiam ter sido extraídos em parte dos dados de produção de energia retirados da ENTSO-E} com os
-dados gerados pelo modelo, observa-se que a ordenação da pegada de carbono permance, com Polônia, Alemanha e França, nessa
-orded, da maior para a menor pegada. Além disso, foi realizada uma comparação entre as médias das intensidades nacionais, 
-dividindo as emissões totais pela geração total de energia. Os valores de correlação de Pearson entre as médias anuais das duas fontes 
-para Alemanha (0,987), França (0,994) e Polônia (0,999) indicam uma altíssima correlação entre ambos valores. Com isso, 
-a conferência realizada sustenta tanto a ordenação quanto as tendências da série ao longo do tempo, ou seja, em que ano a intensidade
-subiu, em que ano caiu, e quanto proporcionalmente a intensidade se moveu de um ano para o outro. E são justamente essas tendências ao longo do tempo,
-a forma da série, que o escalonador consume para tomar suas decisões. 
+Comparando os valores publicados pelo Ember entre 2018 e 2024\footnote{O período se encerra em 2024 porque as estimativas do Ember
+para 2025 podem incorporar registros mensais da própria ENTSO-E, o que comprometeria a independência da comparação.} com os
+dados gerados pelo modelo, observa-se que a ordenação da intensidade de carbono permanece, com Polônia, Alemanha e França, nessa
+ordem, da maior para a menor. Essa comparação utiliza a intensidade anual de cada país, obtida através da razão entre
+as emissões totais e a geração total do ano.\footnote{A Seção \ref{sec:derivacao-sinais} reporta a média aritmética das amostras de 15 minutos,
+que descreve o sinal visto pelo escalonador. A comparação com o Ember exige uma estatística igual à que ele publica, de emissões totais 
+sobre geração total.} A correlação de Pearson entre as sete médias anuais de cada fonte é elevada nos três países: 0,987 na Alemanha,
+0,994 na França e 0,999 na Polônia. Assim, a conferência
+sustenta que tanto os registros de geração quanto a média ponderada pela geração reproduzem, considerando o agregado anual, o que uma
+contabilidade independente reporta sob as mesmas convenções. A ordenação de intensidade entre os países se preserva e as tendências
+de variação de um ano para o outro, sejam subidas, descidas ou estagnações, são acompanhadas, inclusive nos anos de inflexão. Porém, 
+a conferência não sustenta o arranjo dos fatores e composição da matriz no tempo, já que reordená-los não altera o valor anual.
+A ordenação entre os instantes, a amplitude da variação dentro de um mesmo dia e a sua fase no ciclo diário, propriedades essas que
+são usadas pelo escalonador para suas decisões, ficam fora do alcance da conferência. Logo, a conferência anual é condição
+necessária, não suficiente.
 
-Apesar do formato das séries ser altíssimamente correlacionado, os seus níveis absolutos não são. As médias são mais baixas
-em 16,9\% para a Alemanha, 34\% para a França e 19,7\% para a Polônia. A maior parte dessa diferença é explicada através dos
+Os níveis absolutos de intensidade, contudo, não coincidem. As médias obtidas do modelo são mais baixas quando comparadas às do Ember
+em 16,9\% para a Alemanha, 34,0\% para a França e 19,7\% para a Polônia. A maior parte dessa diferença decorre dos
 próprios fatores de intensidade para a Alemanha e Polônia. As médias de emissões de carbono para carvão e gás natural
-relatadas na UNECE consideram casos com a aplicação de mecanismos de captura de carbono, o que diminui os valores totais de pegada
-derivados do modelo. Ao modificar esses fatores do modelo para valores mais altos, desconsiderando mecanismos de captura de carbono implícitos,
-os níveis das séries geradas ficam bem mais próximos em relação aos do Ember, com a Alemanha tendo valores 4,2\% mais baixos e
-a Polônia 2,2\% mais altos. Para a França, essa mudança resulta em uma série 14\% mais baixa ainda, o que indica que existe um resíduo nos dados
-que a harmonização dos grupos e fatores de intensidade não remove. 
+relatadas na UNECE consideram casos com a aplicação de mecanismos de captura de carbono, o que diminui os valores totais de intensidade
+derivados do modelo. Para separar a contribuição dos fatores da dos dados de geração, os tipos da ENTSO-E foram agrupados de acordo com as nove categorias do Ember,
+e em cada país e ano, o fator de intensidade utilizado no Ember para cada categoria foi aplicado à matriz do modelo. Com isso,
+as faixas de resíduos anuais caíram, com resíduo anual entre $-$5,3\% e $-$0,4\% para a Alemanha e entre +2,4\% e +5,2\% 
+para a Polônia. Contudo, para a França, os resíduos anuais permaneceram entre $-$24,5\% e $-$17,0\% em relação ao Ember, 
+o que indica que existe um resíduo nos dados que a harmonização dos grupos e fatores de intensidade não remove.
+As pegadas de carbono reportadas nos capítulos adiante herdam esse desvio, ficando subestimadas na mesma proporção. Portanto, 
+trata-se de um viés de direção e magnitude conhecidas, não de um erro de sentido indeterminado.
 
-Para a rede europeia, não existe nenhum comparador público de intensidade hídrica independente da construção usada 
-neste modelo. O \textit{LBNL Water Impact Tool} \footnote{\url{https://waterimpacttool.lbl.gov}} \citep{water-siddik-2024} 
-é um comparador público horário de intensidade hídrica, porém seus dados são referentes
-as autoridades de balanceamento de energia dos EUA. Para a Europa, a iniciativa \textit{Wattnet} \footnote{\url{https://dashboard.wattnet.eu/map?metric=footprint&dimension=water&scope=life-cycle}} 
-\citep{wattnet-2026} fornece um painel com as
-pegadas ambientais de carbono e água resultantes da geração de energia elétrica pela rede europeia, porém sua construção
-é a mesma do modelo, com os dados de geração de energia sendo extraídos da ENTSO-E, mudando apenas os fatores de intensidade
-hídrica, que são extraídos de \textcite{vanham-europe-2019}.
-  
-  
+Como tanto a série de intensidade de carbono quanto de água são derivadas a partir dos mesmos valores publicados de geração e da mesma fórmula de ponderação,
+a conferência sustenta o procedimento compartilhado, não os fatores hídricos. Para a rede europeia, não existe nenhum comparador 
+público de intensidade hídrica independente da construção usada 
+nesta dissertação. O \textit{Water IMPACT} \citep{water-siddik-2024}\footnote{\url{https://waterimpacttool.lbl.gov}}  
+é um comparador público horário de intensidade hídrica, mas seus registros são referentes
+às autoridades de balanceamento de energia dos EUA. Para a Europa, o Wattnet \citep{wattnet-2026}\footnote{\url{https://dashboard.wattnet.eu/map?metric=footprint&dimension=water&scope=operational}} 
+fornece um painel com as
+pegadas ambientais de carbono e água resultantes da eletricidade da rede europeia. O rastreamento de fluxos de importações e exportações e a pegada baseada
+no consumo presentes no Wattnet ficam fora da fronteira deste instrumento, que considera e contabiliza apenas a pegada baseada 
+na produção de energia elétrica. Ademais, a sua construção
+é a mesma que a adotada neste trabalho, com os dados de geração advindos da ENTSO-E e ponderados por fatores fixos por tipo de produção. 
+A comparação da série derivada com essa ferramenta não testaria o procedimento, mas sim apenas o vetor de fatores, que é o objeto da Subseção seguinte.
+
 \subsection{Sensibilidade aos fatores hídricos}
 \label{subsec:sensibilidade-hidrica}
