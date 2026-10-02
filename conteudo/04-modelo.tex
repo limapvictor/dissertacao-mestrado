@@ -486,7 +486,8 @@ referência pública mais próxima da série derivada desta dissertação, já q
 utilizam emissões de $\mathrm{CO_{2}eq}$ nacionais considerando todo o ciclo de vida e baseadas na produção de energia. 
 
 Comparando os valores publicados pelo Ember entre 2018 e 2024\footnote{O período se encerra em 2024 porque as estimativas do Ember
-para 2025 podem incorporar registros mensais da própria ENTSO-E, o que comprometeria a independência da comparação.} com os
+para 2025 podem incorporar registros mensais da própria ENTSO-E, o que comprometeria a independência da comparação. A inclusão de 2025, ano 
+em que recai uma das janelas da campanha, alteraria pouco os desvios e correlações observados.} com os
 dados gerados pelo modelo, observa-se que a ordenação da intensidade de carbono permanece, com Polônia, Alemanha e França, nessa
 ordem, da maior para a menor. Essa comparação utiliza a intensidade anual de cada país, obtida através da razão entre
 as emissões totais e a geração total do ano.\footnote{A Seção \ref{sec:derivacao-sinais} reporta a média aritmética das amostras de 15 minutos,
@@ -495,11 +496,44 @@ sobre geração total.} A correlação de Pearson entre as sete médias anuais d
 0,994 na França e 0,999 na Polônia. Assim, a conferência
 sustenta que tanto os registros de geração quanto a média ponderada pela geração reproduzem, considerando o agregado anual, o que uma
 contabilidade independente reporta sob as mesmas convenções. A ordenação de intensidade entre os países se preserva e as tendências
-de variação de um ano para o outro, sejam subidas, descidas ou estagnações, são acompanhadas, inclusive nos anos de inflexão. Porém, 
+de variação de um ano para o outro, sejam subidas, descidas ou estagnações, são acompanhadas, inclusive nos anos de inflexão. A correlação
+não é trivial, dado que, por exemplo, enquanto a intensidade alemã sobe em 2021 e 2022, a francesa registra um pico de 31\% em 2022 
+seguido de queda de 48\% até 2024. Porém, 
 a conferência não sustenta o arranjo dos fatores e composição da matriz no tempo, já que reordená-los não altera o valor anual.
 A ordenação entre os instantes, a amplitude da variação dentro de um mesmo dia e a sua fase no ciclo diário, propriedades essas que
 são usadas pelo escalonador para suas decisões, ficam fora do alcance da conferência. Logo, a conferência anual é condição
 necessária, não suficiente.
+
+\begin{table}[htb]
+  \centering
+  \begin{threeparttable}
+    \caption{Conferência da série de carbono contra o Ember, 2018--2024.}
+    \label{tab:conferencia-carbono}
+    \small
+    \begin{tabular}{@{}lrrrrrr@{}}
+      \toprule
+      & \multicolumn{2}{c}{Média do período\tnote{a}} & & & \multicolumn{2}{c}{Resíduo de nível} \\
+      \cmidrule(lr){2-3} \cmidrule(l){6-7}
+      País & Modelo & Ember & Desvio & $r$\tnote{b} & sem captura\tnote{c} & harmonizado\tnote{d} \\
+      \midrule
+      Alemanha & 324,7 & 390,7 & $-$16,9\% & 0,987 & $-$4,2\%  & $-$5,3 a $-$0,4\%  \\
+      França   &  38,5 &  58,3 & $-$34,0\% & 0,994 & $-$14,0\% & $-$24,5 a $-$17,0\% \\
+      Polônia  & 581,2 & 723,8 & $-$19,7\% & 0,999 & $+$2,2\%  & $+$2,4 a $+$5,2\%   \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}\footnotesize
+      \item[a] Em $\mathrm{gCO_{2}eq/kWh}$. Emissões totais do período divididas pela geração
+        total, e não a média aritmética das amostras de 15 minutos reportada na
+        Seção~\ref{sec:derivacao-sinais}.
+      \item[b] Correlação de Pearson entre as sete médias anuais de cada fonte.
+      \item[c] Diferença de período após substituir os fatores de carvão e de gás por valores
+        sem captura de carbono.
+      \item[d] Faixa dos resíduos anuais após aplicar à matriz do modelo os fatores efetivos do
+        Ember por categoria de combustível. Ao contrário das demais colunas, que são do período,
+        esta reporta a variação entre os sete anos.
+    \end{tablenotes}
+  \end{threeparttable}
+\end{table}
 
 Os níveis absolutos de intensidade, contudo, não coincidem. As médias obtidas do modelo são mais baixas quando comparadas às do Ember
 em 16,9\% para a Alemanha, 34,0\% para a França e 19,7\% para a Polônia. A maior parte dessa diferença decorre dos
