@@ -25,137 +25,144 @@
 \label{sec:modelo-pegada-host}
 
 O modelo adotado neste trabalho atribui a cada host do SimGrid um estado
-de pegada ambiental. O host do simgrid possui um estado de potência de 
-processamento a cada instante da simulação, com um job sendo ligado ao host a partir da 
-alocação do escalonamento. Essa escolha é justificada pelo fato de que a atribuição
-do estado de pegada ambiental a cada job acabaria deixando a parcela de
-energia consumida pelo nós ligados mas não alocados a nenhum job sem portador. 
-Essa parcela é relevante, visto que a energia consumido por um host ocioso
-é justamente uma das quantidades que o escalonador tem controle sobre. Considerando
-um modelo de job rígido, com alocação exclusiva, a pegada ambiental de um job
-pode ser derivada exlusivamente através da diferença entre os valores acumulados 
-nos instantes de inicio e fim de todos os seus hosts alocados. Disso, um acumulador
-para cada job se torna redundante, visto que acarretaria em complexidade desnecessária de 
-manutenção.
+de pegada ambiental. A escolha do host como portador decorre de dois fatos. Primeiro, é ele que ocupa, a cada instante 
+da simulação, um estado de potência. Segundo, é a alocação decidida pelo escalonador que o vincula a um job. 
+Cada nó das plataformas é representado por um host do SimGrid, e o texto utiliza o termo
+\textit{host} quando se refere à entidade do simulador. Sob jobs rígidos e alocação exclusiva, a pegada 
+de um job pode ser obtida integralmente dos hosts alocados a ele, como a soma das diferenças entre seus acumulados
+no término e no início da execução (Equação~\ref{eq:pegada-carbono-job}). Um acumulador
+para cada job seria, portanto, estado redundante, pois exigiria a reconciliação com o acumulador dos hosts a
+cada atualização de intensidade, mudança de estado de potência e início ou término de job.
 
-A contabilidade elementar realizada pelo modelo converte potência em energia, e posteriormente
-energia em pegada ambiental. Considerando um intervalo de tempo $\Delta t$ segundos, um host $h$ em um estado de potência
-consumindo $P$ watts consome uma energia de TI de $E = \frac{P \times \Delta t}{3,6 \times 10^6}$, expressa em kWh.
-A partir da contabilização da energia consumida, o modelo acumula a pegada ambiental em três
-acumuladores operacionais distintos, um para a pegada de carbono, outro para 
-a pegada hídrica no sítio e outro para a pegada hídrica fora do sítio. Além disso, 
-dois valores estáticos armazenam as pegadas incorporadas, tanto para carbono quanto para água.
-As pegadas operacionais são calculadas, respectivamente, pelas equações: 
+A contabilidade elementar converte potência em energia e, em seguida,
+energia em pegada. Em um intervalo de $\Delta t$ segundos, durante o qual um host $h$ demanda uma potência
+constante de $P$ watts, a energia de TI consumida, em kWh, é$E = \frac{P \times \Delta t}{3,6 \times 10^6}$.
+Cada host mantém três acumuladores operacionais, um para a pegada de carbono, outro para 
+a pegada hídrica no sítio (direta) e outro para a pegada hídrica fora do sítio (indireta). Há ainda
+dois acumuladores incorporados, de carbono e de água, que amortizam a pegada da fabricação do host
+linearmente ao longo de sua vida útil, independentemente do estado de potência.
+As equações a seguir descrevem a atualização dos acumuladores operacionais de um host $h$ qualquer, com o índice $h$ implícito.
     \begin{equation}
-        \label{eq:pegada_carbono}
+        \label{eq:pegada-carbono}
         F^{C}_{op} \leftarrow F^{C}_{op} + E \times PUE \times I_{C}
     \end{equation}
 
     \begin{equation}
-        \label{eq:pegada_hidrica_onsite}
+        \label{eq:pegada-hidrica-onsite}
         F^{W}_{on} \leftarrow F^{W}_{on} + E \times WUE
     \end{equation}
 
     \begin{equation}
-        \label{eq:pegada_hidrica_offsite}
+        \label{eq:pegada-hidrica-offsite}
         F^{W}_{off} \leftarrow F^{W}_{off} + E \times PUE \times I_{W}
     \end{equation}
 
-As três parcelas não compartilham o mesmo multiplicador devido a definição das 
-métricas envolvidas. Tanto as emissões de carbono quanto o consumo de água
-fora do sítio são dependentes do consumo total de energia da instalação, que é
-obtido justamente ao multiplicar a energia de TI consumida pelo PUE. Por outro lado,
-o consumo de água no sítio é dependente tão somente da energia de TI consumida,
-posteriormente multiplicado pelo WUE, e apenas por ele. Assim, manter as três parcelas
-separadas preserva a distinção entre consumo direto e indireto, além de permitir que
-cada uma seja contabilizada ou desativada de forma independente. 
+em que o PUE é adimensional, a intensidade de carbono $I_{C}$ é medida em $gCO_{2}eq/kWh$, 
+a intensidade hídrica $I_{W}$ medida em $L/kWh$ e o WUE é medido em $L/kWh$ de energia de TI.
 
-Sendo $\mathcal{H}_{j}$ o conjunto de hosts alocados ao job $j$, e $t_{0}$ e $t_{d}$ os
-instantes de início e término da sua execução, a pegada de carbono do job é dada por
+As três parcelas não compartilham o mesmo multiplicador devido à definição das 
+métricas envolvidas. As emissões de carbono e a água consumida
+fora do sítio decorrem da geração de toda a energia que a instalação retira da rede, isto é,
+da energia de TI multiplicada pelo PUE. Já o WUE é definido pela razão entre água e unidade de energia de TI 
+(Seção~\ref{sec:pegadas-em-computacao}), de modo que a água consumida no sítio multiplica essa energia $E$ diretamente,
+sem necessidade de passar pelo PUE. Assim, manter as três parcelas
+separadas preserva a distinção entre consumo direto e indireto, e permite que
+cada uma seja contabilizada ou desativada independentemente. 
+
+Sendo $\mathcal{H}_{j}$ o conjunto de hosts alocados ao job $j$, e $t^{ini}_{j}$ e $t^{fim}_{j}$ os
+instantes de início e término da sua execução, e denotando por $F^{C}_{op,h}$ o valor do acumulador de carbono 
+do host $h$ no instante $t$, a pegada de carbono do job é dada por
 
 \begin{equation}
     F^{C}_{j} = \sum_{h \in \mathcal{H}_{j}}
-        \left[ F^{C}_{op,h}(t_{d}) - F^{C}_{op,h}(t_{0}) \right]
+        \left[ F^{C}_{op,h}(t^{fim}_{j}) - F^{C}_{op,h}(t^{ini}_{j}) \right]
     \label{eq:pegada-carbono-job}
 \end{equation}
 
-e as duas pegadas hídricas são obtidas da mesma forma, a partir dos 
-acumuladores correspondentes.
+Tanto as pegadas hídricas quanto as incorporadas são obtidas do mesmo modo, com seus acumuladores correspondentes. 
+A pegada acumulada da plataforma até um certo instante $T$ é a soma dos
+acumuladores de todos os seus hosts,
+\begin{equation}
+    F^{C}(T) = \sum_{h \in \mathcal{H}}
+        \left[ F^{C}_{op,h}(T) \right]
+    \label{eq:pegada-carbono-plataforma}
+\end{equation}
 
-A atualização do estado de um host no modelo é feita de maneira adiada sempre 
-que ocorre um evento, que pode ser de duas famílias. A primeira família 
-são os eventos próprios do SimGrid, como eventos de início 
-ou fim do job, ligamento ou desligamento do host, mudança de pstate, com todos
-esses ocasionando da mudança de potência de host. A outra família são os eventos
-de atualização dos parâmetros operacionais do host, que são replicadas pelo lado
-do Batsim a cada nova amostra do sinal ambiental em questão.
+e inclui, além da pegada dos jobs, a dos hosts ociosos, que não pertence a nenhum job.
 
-A acumulação das pegadas operacionais pelo modelo é feita a cada novo evento, motivado
-pelo fato de que as intensidades ambientais, tanto de carbono quanto de água, variam ao 
-longo do tempo em que um job é executado. Como a potência do host e as intensidades
-ambientais permanecem constante entre dois eventos consecutivos, essa acumulação
-discreta é equivalente a integral apresentada na \hyperref[eq:pegada]{Equação 2.1}. 
-A variação dos sinais ambientais ocorre em uma janela de tempo menor do que a duração de jobs
-maiores, de modo que um job atravessa diversos valores de intensidade ao longo da sua
-execução. Considerando um traço com intensidade variando em janelas de 15 minutos, um job com 
-seis horas de execução atravessaria 24 janelas de intensidades diferentes. Como mencionando anteriormente,
-uma política de escalonamento ambientalmente consciente se importa principalmente com "quando" 
-um job roda.
-
-Uma possível alternativa a esse modelo de contabilidade seria mulitplicar a energia total
-consumida pelo job pela média das intensidades em sua janela de execução. Com potência ativa
-e alocação exclusiva, esse produto coincide com o valor acumulado evento a evento. A escolha pelo
-modelo de acumulação se dá pelo fato de que é essa igualdade de valores depende que a potência do 
-host permaneça constante ao longo da janela de execução do job. Esse hipótese deixa de valer
-caso sejam considerados mecanismos de pausa e retomada de job, ou de alteração na potência intra-job.
-A forma acumulada permanece correta para esses casos, de modo que tais extensões alteram apenas
-a política que consome o modelo, não a contabilidade que o define. Essa contabilidade, portanto,
-torna possível a comparação de políticas de escalonamento alternativas quanto à pegada ambiental,
+O modelo acumula as pegadas operacionais durante a simulação, e não sobre valores
+agregados ao fim dela, porque as intensidades de carbono e de água variam ao 
+longo do tempo em que um job é executado. A variação dos sinais ambientais ocorre em uma escala de tempo menor do que a duração de jobs
+longos e um mesmo job atravessa diversos valores de intensidade durante a sua
+execução. Com o sinal amostrado a cada 15 minutos, um job de 
+seis horas atravessa 24 valores diferentes de intensidade. Como mencionado 
+na Seção~\ref{sec:pegadas-em-computacao}, é sobre o instante de tempo em que cada job executa que uma política 
+ambientalmente consciente atua. Essa contabilidade, portanto,
+torna possível a comparação de políticas de escalonamento alternativas quanto à pegada,
 e não apenas quanto à energia consumida.
 
-As equações acima contém quatro parâmetros operacionais que são configuráveis por
-host do SimGrid. Esses parâmetros são: o PUE, que não tem dimensão; 
-a intensidade de carbono $I_{C}$, que é medida em $gCO_{2}eq/kWh$; a intensidade hídrica $I_{W}$, que é medida em $L/kWh$; 
-e o WUE, que é medido em $L/kWh$. Como a configuração desses parêmtros é feita por host, e não
-por plataforma ou simulação, é possível que hosts de zonas distintas recebam sinais de matrizes
-elétricas distintas, ou que hosts de uma mesma zona recebam fatores de instalação distintos. Assim,
-o modelo permite a substituição da rede elétrica, sítio ou conjunto de fatores de intensidade via
-troca de parâmetros, sem alterar o modelo. Além disso, esses parâmetros podem ser alterados
-ao longo da execução da simulação através de métodos de atribuição. Por fim, os valores 
-estáticos das pegadas incorporadas também são configuráveis por host.
+A atualização do estado de um host no modelo é feita sob demanda (\textit{lazy}) sempre 
+que ocorre um evento, que pode ser de duas famílias. A primeira família 
+são os eventos próprios do SimGrid, como eventos de início 
+ou fim de jobs, acionamento ou desligamento do host, mudança de estado de potência (\textit{pstate}), todos 
+alterando a potência do host. A outra família são as atualizações dos parâmetros 
+operacionais do host, disparadas pelo
+Batsim a cada nova amostra do sinal. Cada atualização de parâmetro é
+ela própria um evento e fecha o intervalo em curso com o valor anterior antes
+de adotar o novo. Assim, potência e os parâmetros são constantes entre dois eventos consecutivos, e 
+essa acumulação discreta calcula exatamente a integral no tempo da potência do host multiplicada pelos parâmetros
+operacionais vigentes, que, para um job em potência ativa, se reduz à Equação~\ref{eq:pegada}.
 
-O Batsim é o responsável por realizar a ligação entre o modelo de pegada ambiental
-por host e a execução dos jobs. Nessa ligação se realizam as duas primeiras extensões
-anunciadas ao fim do \hyperref[sec:simulacao-rjms]{Capítulo 2}. A primeira dessas extensões
-é o consumo de sinais ambientais externos ao longo do tempo de execução da simulação, 
-onde o simulador reproduz atualizações datadas de intensidade de carbono, intensidade hídrica,
-PUE e WUE para todos os hosts em uma zona do SimGrid. Dessa forma, as intensidades de carbono e água acompanham 
-as séries descritas na \hyperref[sec:derivacao-sinais]{Seção 5.2}, enquanto o PUE e WUE, que utilizam do mesmo 
-mecanismo, são mantidos neutros durante a campanha descrita pela \hyperref[sec:ambiente-experimental-comum]{Seção 5.3}.
-A segunda extensão é a contabilização da pegada ambiental por job, onde como descrito anteriormente,
-a pegada ambiental de um job é registrada através da diferença entre os acumulados
-operacionais de cada host alocado ao job no instante de término e no instante
-de início. As componentes operacionais e incorporadas da pegada ambiental são
-exportadas separadamente no Batsim, o que preserva no dado a fronteira estabelecida
-pelo \hyperref[sec:pegadas-em-computacao]{Capítulo 2}, visto que o como o escalonador tem o controle
-apenas das operacionais, somá-las as incoporadas ocultaria tal distinção.
+Uma alternativa a essa contabilidade seria multiplicar a energia total
+consumida pelo job pela média temporal das intensidades em seu intervalo de execução. Com potência ativa constante
+e alocação exclusiva, esse produto coincide com o valor acumulado evento a evento. Essa igualdade depende de que 
+a potência do host permaneça constante durante toda a execução. Essa hipótese deixa de valer
+sob mecanismos de suspensão e retomada de jobs ou de variação de potência ao longo do job, motivo que justifica
+a preferência pela acumulação.
+A forma acumulada permanece correta nesses casos, de modo que tais extensões alteram apenas
+a política que consome o modelo, não a contabilidade que o define. 
 
-O modelo possui fronteiras declaradas, com essas fronteiras sendo de duas naturezas
-distintas. O primeiro tipo de fronteira se dá pela própria construção do modelo, com 
-características e intervenções são preteridas a fim de simplificar o desenvolvimento, 
-execução e análise do modelo. Neste trabalho, contabilização dos recursos de rede 
-e armazenamento dos nós, desligamento de nós ociosos e variação de potência na execução de um mesmo job
-são exemplos de limites do modelo. O segundo tipo de fronteira se dá pela indisponibilidade
-de dados, onde o perfil de potência por tipo de aplicação é um exemplo de limite do modelo.
-Os traços com o histórico dos jobs registram a quantidade de nós requisitados e a duração
-de execução, mas não a natureza da aplicação, pensando por exemplo em uma aplicação 
-com alto grau de processamento, em contraste com uma aplicação com alto grau de acesso ao disco.
+As equações~\ref{eq:pegada-carbono} e \ref{eq:pegada-hidrica-offsite} contêm quatro parâmetros operacionais 
+que são configuráveis por host. Como essa configuração é feita por host, e não
+por plataforma ou simulação, hosts de zonas distintas podem receber sinais de redes
+elétricas diferentes, e hosts de uma mesma zona podem receber PUE e WUE próprios. Uma zona 
+(\textit{netzone} do SimGrid) é um agrupamento de hosts que recebem o mesmo sinal. Assim,
+a substituição da rede elétrica, do sítio ou do conjunto de fatores de intensidade torna-se apenas uma
+troca de parâmetros, e não uma alteração da contabilidade. Eles também podem ser alterados
+durante a simulação através de métodos de atribuição. Os parâmetros incorporados, isto é, 
+as pegadas de carbono e de água da manufatura do host e sua vida útil, também são definidos
+por host.
 
-Por último, o modelo de pegada ambiental é expandido para permitir a preempção dos jobs,
-ou seja, permitir que um job seja interrompido e retomado posteriormente, com a liberação dos 
-nós alocados a cada pausa. Para isso, é necessário que o modelo de pegada ambiental
-considere a energia consumida para a pausa e retomada do job, que é obtida através de 
-um novo parâmetro operacional.
+O Batsim liga o modelo de pegadapor host à execução dos jobs. É nessa ligação que se concretizam as duas 
+primeiras extensões anunciadas ao fim da Seção~\ref{sec:simulacao-rjms}. A primeira dessas extensões
+é o consumo de sinais ambientais externos ao longo do tempo simulado, 
+na qual o Batsim reproduz atualizações datadas de intensidade de carbono, intensidade hídrica,
+PUE e WUE para todos os hosts de uma zona do SimGrid. Desse modo, as intensidades de carbono e água acompanham 
+as séries descritas na Seção~\ref{sec:derivacao-sinais}, enquanto o PUE e o WUE, que usam o mesmo 
+mecanismo, ficam fixos em 1 e 0 na campanha descrita na Seção~\ref{sec:ambiente-experimental-comum}.
+A segunda é a contabilização da pegada por job, que o Batsim registra conforme a Equação~\ref{eq:pegada-carbono-job}. 
+As componentes operacionais e incorporadas da pegada são
+exportadas separadamente, o que preserva no dado a fronteira estabelecida
+na Seção~\ref{sec:pegadas-em-computacao}: como o escalonador tem o controle
+apenas das operacionais, somá-las às incoporadas ocultaria essa distinção.
+
+As fronteiras do modelo são declaradas e de duas naturezas. A primeira é de escopo e reúne o que o modelo
+deliberadamente não representa. A energia consumida pelos componentes de rede e de armazenamento, por exemplo,
+não entra na contabilidade. Ele também não representa a transição entre ligado e desligado,
+isto é, a quantidade de tempo e a energia necessária para religar um nó; o desligamento
+é, portanto, instantâneo e sem custo. A segunda decorre da indisponibilidade
+de dados, e seu exemplo central é o perfil de potência por tipo de aplicação: os traços com o histórico dos jobs 
+registram a quantidade de nós requisitados e a duração
+de execução, mas não a natureza da aplicação, por exemplo, se é intensiva em processamento ou em 
+acesso ao disco (Seção~\ref{sec:execucao-a-pegada}).
+
+A preempção, extensão anunciada na Seção~\ref{sec:simulacao-rjms}, não exige nenhum termo novo nesta 
+contabilidade. A forma acumulada já cobre a suspensão e posterior retomada de um job, 
+e o trabalho perdido desde o último ponto de salvamente (\textit{checkpoint}) é contabilizado como energia ativa,
+quando reexecutado, sob a intensidade desse instante. Os mecanismos de preempção necessitam de parâmetros
+temporais no modelo, como a duração do salvamento e o regime de progresso perdido, apresentados no Capítulo -
+junto à política que os consome.
+
 
 \section{Derivação dos sinais ambientais}
 \label{sec:derivacao-sinais}
@@ -428,7 +435,7 @@ são submetidos ao escalonador em $t = 0$ na mesma ordem em que haviam sido subm
 é a própria estimativa realizada pelo usuário na submissão original do job, podendo ser elevada ao tempo de execução registrado
 em caso de estouro de tempo de execução ou de estimativa ausente originalmente. As superestimações feitas pelos usuários são preservadas,
 com a mediana da razão entre \textit{walltime} pelo tempo de execução variando entre 3,6 e 20 nos extratos utilizados. As métricas de desempenho
-da política consideram apenas os jobs reproduzidos, não os jobs de aquecimento que já estavam rodando no instante $T_{0}$, enquanto
+da política consideram apenas os jobs reproduzidos, não os jobs de aquecimento que já estavam executando no instante $T_{0}$, enquanto
 as pegadas ambientais são totais da plataforma, incluindo ambos.
 
 O modelo de job é rígido, o que combinado com potência ativa constante resulta na premissa de invariância de que reordernar
@@ -461,7 +468,7 @@ A primeira ausência decorre de por um parâmetro presente no modelo, mas neutra
 As plataformas não atribuem valor para o PUE, WUE ou pegadas incorporadas dos seus nós, o que resulta no acumulador de água
 no sítio sempre zerado. O modelo de pegada é capaz de acumulá-la, mas a campanha não o faz. A segunda ausência, da falta de dados necessários. Por exemplo,
 os traços dos jobs não indicam qual o perfil de potência de cada aplicação, o que impede o desenvolvimento de políticas que tomem decisões
-de em qual horário ou em quais nós rodar pelo perfil da aplicação. Por fim, a terceira ausência corresponde a alavancas não modeladas, que mudariam o objeto de estudo por si.
+de em qual horário ou em quais nós executar pelo perfil da aplicação. Por fim, a terceira ausência corresponde a alavancas não modeladas, que mudariam o objeto de estudo por si.
 A inclusão de jobs moldáveis destruiria a premissa de invariância. A possibilidade de DVFS permitiria
 a modificação da energia ativa, que se mantém constante de propósito. A migração geográfica de jobs entre sítios de HPC não é modelada
 por duas razões. Primeiro, como ela amplia a decisão de quando para incluir onde executar, ela pressupõe um arranjo organizacional de 
